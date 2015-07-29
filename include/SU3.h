@@ -27,12 +27,21 @@ public:
     long numerator();
     long denominator();
 
+    sqrat operator+();
+    sqrat operator-();
+
     /* Arithmetic operations */
     sqrat operator*(sqrat);
     sqrat operator*(long);
 
     sqrat operator/(sqrat);
     sqrat operator/(long);
+
+    sqrat operator+(sqrat);
+    sqrat operator+(long);
+
+    sqrat operator-(sqrat);
+    sqrat operator-(long);
 
     /* Convert to a string */
     char* tostring(char*, size_t);

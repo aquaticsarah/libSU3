@@ -57,7 +57,6 @@ TEST(sqrat-arithmetic) void test_sqrat_arith()
     c = a*b;
     TEST_EQ_SQRAT(c, 1, 6, "sqrt(1/4) * sqrt(2/3)");
 
-    /* Test multiplication by an integer */
     c = a*2;
     TEST_EQ_SQRAT(c, 1, 1, "sqrt(1/4) * 2");
 
@@ -68,7 +67,26 @@ TEST(sqrat-arithmetic) void test_sqrat_arith()
     c = a/b;
     TEST_EQ_SQRAT(c, 3, 8, "sqrt(1/4) / sqrt(2/3)");
 
-    /* Test division by an integer */
-    c = d / 4;
+    c = d/4;
     TEST_EQ_SQRAT(c, -1, 24, "-sqrt(2/3) / 4)");
+
+    /* Test integer addition/subtraction */
+    c = a + 1;
+    TEST_EQ_SQRAT(c, 9, 4, "sqrt(1/4) + 1");
+
+    c = a + (-1);
+    TEST_EQ_SQRAT(c, -1, 4, "sqrt(1/4) + (-1)");
+
+    c = a - 2;
+    TEST_EQ_SQRAT(c, -9, 4, "sqrt(1/4) - 2");
+
+    c = a - (-3);
+    TEST_EQ_SQRAT(c,  49, 4, "sqrt(1/4) - (-3)");
+
+    /* Test other addition/subtraction */
+    c = b + d;
+    TEST_EQ_SQRAT(c, 0, 1, "sqrt(2/3) + -sqrt(2/3)");
+
+    c = d - b;
+    TEST_EQ_SQRAT(c, -8, 3, "-sqrt(2/3) - sqrt(2/3)");
 }

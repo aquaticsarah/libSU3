@@ -1,6 +1,7 @@
 /* libSU3: Test driver */
 
 #include <stdio.h>
+#include <limits.h>
 
 #include "SU3.h"
 #include "test.h"
