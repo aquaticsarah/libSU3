@@ -1,0 +1,8 @@
+General TODOs
+=============
+
+These are things which we want to have at some point, but which are not easily
+specified in one place in the code. Things which can be specified in the code
+are written in inline comments starting with "TODO:".
+
+* Integer overflow detection in sqrat operations

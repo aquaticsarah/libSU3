@@ -3,6 +3,8 @@
 #ifndef __SU3_TEST_H__
 #define __SU3_TEST_H__
 
+#include <stdio.h>
+
 extern int tests_run;
 extern int tests_passed;
 
