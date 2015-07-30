@@ -47,4 +47,15 @@ public:
     char* tostring(char*, size_t);
 };
 
+/* Min and max for various numbers of arguments */
+long min(long a, long b);
+long min(long a, long b, long c);
+long min(long a, long b, long c, long d);
+long max(long a, long b);
+long max(long a, long b, long c, long d, long e, long f);
+
+/* Information about representations */
+long dimension(long p, long q);
+long degeneracy(long p1, long q1, long p2, long q2, long p, long q);
+
 #endif

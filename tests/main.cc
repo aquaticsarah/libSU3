@@ -13,6 +13,8 @@ int tests_passed;
 void test_gcd();
 void test_sqrat();
 void test_sqrat_arith();
+void test_dimension();
+void test_degeneracy();
 
 int main()
 {
@@ -34,6 +36,18 @@ int main()
     fprintf(stderr, "\nTesting sqrat-arithmetic...\n");
     test_sqrat_arith();
     fprintf(stderr, "sqrat-arithmetic: %d/%d tests passed\n", tests_passed, tests_run);
+
+    tests_run = 0;
+    tests_passed = 0;
+    fprintf(stderr, "\nTesting dimension...\n");
+    test_dimension();
+    fprintf(stderr, "dimension: %d/%d tests passed\n", tests_passed, tests_run);
+
+    tests_run = 0;
+    tests_passed = 0;
+    fprintf(stderr, "\nTesting degeneracy...\n");
+    test_degeneracy();
+    fprintf(stderr, "degeneracy: %d/%d tests passed\n", tests_passed, tests_run);
 
     return 0;
 }

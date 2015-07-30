@@ -1,0 +1,27 @@
+/* libSU3: Miscellaneous helper functions */
+
+/* Min and max for various numbers of arguments */
+long min(long a, long b)
+{
+    return (a < b) ? a : b;
+}
+
+long min(long a, long b, long c)
+{
+    return min(min(a, b), c);
+}
+
+long min(long a, long b, long c, long d)
+{
+    return min(min(a, b), min(c, d));
+}
+
+long max(long a, long b)
+{
+    return (a > b) ? a : b;
+}
+
+long max(long a, long b, long c, long d, long e, long f)
+{
+    return max(max(max(a, b), max(c, d)), max(e, f));
+}
