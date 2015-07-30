@@ -16,24 +16,7 @@
             "Expected %s == %s, got %s", thing, pqbuf, abuf); \
     } while (0)
 
-TEST(gcd) void test_gcd()
-{
-    /* Test GCDs - in particular, check that the result always has the same
-        sign as its second argument */
-    long d1 = gcd(2, 5);
-    long d2 = gcd(10, 5);
-    long d3 = gcd(-22, 14);
-    long d4 = gcd(3, -10101);
-    long d5 = gcd(-55, -89);
-
-    DO_TEST(d1 == 1, "Expected gcd(2,5)=1, got %ld", d1);
-    DO_TEST(d2 == 5, "Expected gcd(5,10)=5, got %ld", d2);
-    DO_TEST(d3 == 2, "Expected gcd(-22,14)=2, got %ld", d3);
-    DO_TEST(d4 == -3, "Expected gcd(3,-10101)=3, got %ld", d4);
-    DO_TEST(d5 == -1, "Expected gcd(-55,-89)=1, got %ld", d5);
-}
-
-TEST(sqrat) void test_sqrat()
+TEST(sqrat)
 {
     /* Test reduction */
     sqrat a(2, 4);
@@ -46,7 +29,7 @@ TEST(sqrat) void test_sqrat()
     TEST_EQ_SQRAT(a, -121, 1, "-11");
 }
 
-TEST(sqrat-arithmetic) void test_sqrat_arith()
+TEST(sqrat_arithmetic)
 {
     sqrat a(1, 4);
     sqrat b(2, 3);

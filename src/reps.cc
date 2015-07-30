@@ -29,7 +29,8 @@ long degeneracy(long p1, long q1, long p2, long q2, long p, long q)
     if ((a < -min(q1, q2)) || (a > max(p1, p2))) return 0;
     if ((a+b < 0) || (a+b > min(p1+p2, p1+q1, p2+q2))) return 0;
 
-    /* If we get to here, the representation does appear */
+    /* If we get to here, the given rep does appear, so we
+        just need to calculate its degeneracy */
     long d = 1 + min(q2, p1+q1, b, p1-a)
                - max(0, b-q1, b-p2, -a, b-a-q1, a+b-p2);
 

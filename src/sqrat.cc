@@ -6,7 +6,7 @@
 #include "SU3.h"
 
 /* Helper: Calculate sign(x) * x^2 */
-long sign_square(long x)
+static long sign_square(long x)
 {
     if (x < 0) return -x*x;
     else return x*x;
@@ -14,7 +14,7 @@ long sign_square(long x)
 
 /* Helper: Calculate the square root of an integer, which must be a square.
     Raises an exception if the values is not a square */
-long isqrt(long x)
+static long isqrt(long x)
 {
     if (x < 0) return -1;
     /* TODO: Possibly optimise this? */
@@ -30,7 +30,7 @@ long isqrt(long x)
 /* Calculate a GCD, giving the result the same sign as q.
     This is so that, when we reduce a fraction, the numerator can have any
     sign, but the denominator is always >= 0 */
-long gcd(long p, long q)
+static long gcd(long p, long q)
 {
     if (p == 0) return q;
     if (q == 0) return p;

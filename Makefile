@@ -1,13 +1,16 @@
+# Where to place intermediate files
+BUILDDIR := /tmp/libSU3
+
 # Autodetect source files
 SRC := $(wildcard src/*.cc)
 TEST_SRC := $(wildcard tests/*.cc)
 
 # Various files which we will produce
-OBJ := $(SRC:src/%.cc=build/%.o)
-TEST_OBJ := $(TEST_SRC:tests/%.cc=build/tests/%.o)
+OBJ := $(SRC:src/%.cc=$(BUILDDIR)/%.o)
+TEST_OBJ := $(TEST_SRC:tests/%.cc=$(BUILDDIR)/tests/%.o)
 
-DEP := $(SRC:src/%.cc=build/%.d)
-TEST_DEP := $(TEST_SRC:tests/%.cc=build/tests/%.d)
+DEP := $(SRC:src/%.cc=$(BUILDDIR)/%.d)
+TEST_DEP := $(TEST_SRC:tests/%.cc=$(BUILDDIR)/tests/%.d)
 
 DIRS := $(sort $(dir $(OBJ) $(DEP) $(TEST_OBJ) $(TEST_DEP)))
 
@@ -25,44 +28,44 @@ MKDEP := g++ -MM -MP
 # Top-level targets
 default: libSU3.a
 
-test: build/tests/main
+test: run-tests
 	@echo "Running tests"
-	@build/tests/main
+	@./run-tests
 
 clean:
 	@echo "Cleaning up"
-	@rm -rf build/
+	@rm -rf $(BUILDDIR)/
 
 clean-all:
 	@echo "Cleaning up everything"
-	@rm -rf build/
-	@rm -f libSU3.a
+	@rm -rf $(BUILDDIR)/
+	@rm -f libSU3.a run-tests
 
 libSU3.a: $(OBJ)
 	@echo "AR $@"
 	@ar rcsu $@ $(OBJ)
 
 # Intermediate targets
-build/tests/main: $(TEST_OBJ) libSU3.a
+run-tests: $(TEST_OBJ) libSU3.a
 	@echo "Linking test driver"
 	@$(LD) $(LDFLAGS) $(TEST_OBJ) libSU3.a -o $@
 
 # Rules to build object files and dependency information
-$(OBJ):build/%.o: src/%.cc | $(DIRS)
+$(OBJ):$(BUILDDIR)/%.o: src/%.cc | $(DIRS)
 	@echo "CC $<"
 	@$(CC) $(CFLAGS) $(INCLUDE) $< -o $@
 
-$(DEP):build/%.d: src/%.cc | $(DIRS)
+$(DEP):$(BUILDDIR)/%.d: src/%.cc | $(DIRS)
 	@echo "MKDEP $<"
-	@$(MKDEP) $(INCLUDE) $< -MQ build/$*.o -MQ $@ -MF $@
+	@$(MKDEP) $(INCLUDE) $< -MQ $(BUILDDIR)/$*.o -MQ $@ -MF $@
 
-$(TEST_OBJ):build/tests/%.o: tests/%.cc | $(DIRS)
+$(TEST_OBJ):$(BUILDDIR)/tests/%.o: tests/%.cc | $(DIRS)
 	@echo "CC $<"
 	@$(CC) $(CFLAGS) $(TEST_INCLUDE) $< -o $@
 
-$(TEST_DEP):build/tests/%.d: tests/%.cc | $(DIRS)
+$(TEST_DEP):$(BUILDDIR)/tests/%.d: tests/%.cc | $(DIRS)
 	@echo "MKDEP $<"
-	@$(MKDEP) $(TEST_INCLUDE) $< -MQ build/tests/$*.o -MQ $@ -MF $@
+	@$(MKDEP) $(TEST_INCLUDE) $< -MQ $(BUILDDIR)/tests/$*.o -MQ $@ -MF $@
 
 # Directory tree
 $(DIRS):

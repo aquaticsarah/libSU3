@@ -10,7 +10,7 @@ extern int tests_passed;
 
 /* A label to indicate which functions are top-level tests.
     'module' should be the name of the module being tested (not in quotes) */
-#define TEST(module)
+#define TEST(module) void test_##module()
 
 /* Test some predicate, printing a message if it fails */
 #define DO_TEST(pred, message, args...) \

@@ -3,7 +3,7 @@
 #include "SU3.h"
 #include "test.h"
 
-TEST(dimension) void test_dimension()
+TEST(dimension)
 {
     long dim;
 
@@ -30,7 +30,7 @@ TEST(dimension) void test_dimension()
 #undef TEST_DIMENSION
 }
 
-TEST(degeneracy) void test_degeneracy()
+TEST(degeneracy)
 {
     long d;
 

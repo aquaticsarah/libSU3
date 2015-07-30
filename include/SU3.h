@@ -5,8 +5,6 @@
 
 #include <stddef.h>
 
-long gcd(long p, long q);
-
 /* Class to represent (+ or -) the square root of a rational.
     The actual value represented is:
     if (p < 0)  then -sqrt(-p/q)
