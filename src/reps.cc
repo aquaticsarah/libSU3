@@ -1,11 +1,25 @@
 /* libSU3: Miscellaneous information about irreps of SU(3) */
 
+#include <stdio.h>
+
 #include "SU3.h"
 
 /* Calculate the dimension of one irrep */
 long dimension(long p, long q)
 {
     return (p+1)*(q+1)*(p+q+2)/2;
+}
+
+/* Display the name of a representation.
+    TODO: Deal with primed reps */
+char* repname(char* buffer, size_t len, long p, long q)
+{
+    long dim = dimension(p, q);
+    if (q > p)
+        snprintf(buffer, len, "%ld*", dim);
+    else
+        snprintf(buffer, len, "%ld", dim);
+    return buffer;
 }
 
 /* Calculate the degeneracy of the (p,q) irrep in the decomposition of
@@ -29,10 +43,10 @@ long degeneracy(long p1, long q1, long p2, long q2, long p, long q)
     if ((a < -min(q1, q2)) || (a > max(p1, p2))) return 0;
     if ((a+b < 0) || (a+b > min(p1+p2, p1+q1, p2+q2))) return 0;
 
-    /* If we get to here, the given rep does appear, so we
-        just need to calculate its degeneracy */
+    /* If we get here, we have a formula for the degeneracy of the
+        rep; the rep appears iff this value is positive */
     long d = 1 + min(q2, p1+q1, b, p1-a)
                - max(0, b-q1, b-p2, -a, b-a-q1, a+b-p2);
 
-    return d;
+    return max(0, d);
 }

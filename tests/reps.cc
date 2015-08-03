@@ -1,5 +1,8 @@
 /* libSU3: Tests for irrep information */
 
+#include <stdlib.h>
+#include <time.h>
+
 #include "SU3.h"
 #include "test.h"
 
@@ -72,4 +75,50 @@ TEST(degeneracy)
     TEST_DEGENERACY(2, 0, 0, 1, 0, 2, 0);
 
 #undef TEST_DEGENERACY
+}
+
+/* Check the total size of all summands after decomposing a product rep */
+
+/* Helper function */
+void test_product_rep(long p1, long q1, long p2, long q2)
+{
+    /* Calculate bounds on p, q */
+    long upper = p1+q1+p2+q2;
+    long p,q;
+
+    long size = 0;
+    long expected = dimension(p1, q1) * dimension(p2, q2);
+
+    for (p = 0; p <= upper; ++p)
+        for (q = 0; q <= upper-p; ++q)
+        {
+            long dim = dimension(p, q);
+            long d = degeneracy(p1, q1, p2, q2, p, q);
+            if (d == 0) continue;
+            size += dim * d;
+        }
+
+    DO_TEST(size == expected,
+        "Decomposing (%ld,%ld) x (%ld,%ld); "
+        "expected total size %ld * %ld = %ld, got %ld",
+        p1, q1, p2, q2,
+        dimension(p1, q1), dimension(p2, q2), expected, size);
+}
+
+TEST(rep_sizes)
+{
+    srand(time(NULL));
+#define RANDRANGE(n) ((long)((random() / (double)RAND_MAX) * n))
+
+    /* Do some randomised tests */
+    int i;
+    long p1, q1, p2, q2;
+    for (i = 0; i < 100; ++i)
+    {
+        p1 = RANDRANGE(100);
+        q1 = RANDRANGE(100);
+        p2 = RANDRANGE(100);
+        q2 = RANDRANGE(100);
+        test_product_rep(p1, q1, p2, q2);
+    }
 }
