@@ -6,9 +6,7 @@
 #include <stddef.h>
 
 /* Class to represent (+ or -) the square root of a rational.
-    The actual value represented is:
-    if (p < 0)  then -sqrt(-p/q)
-    if (p >= 0) then  sqrt(p/q)
+    The actual value represented is (sign(p) * sqrt(|p| / q))
 */
 class sqrat
 {
@@ -54,6 +52,7 @@ long max(long a, long b, long c, long d, long e, long f);
 
 /* Information about representations */
 long dimension(long p, long q);
-long degeneracy(long p1, long q1, long p2, long q2, long p, long q);
+char* repname(char* buffer, size_t len, long p, long q);
+long degeneracy(long p, long q, long p1, long q1, long p2, long q2);
 
 #endif

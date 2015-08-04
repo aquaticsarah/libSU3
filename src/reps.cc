@@ -26,7 +26,7 @@ char* repname(char* buffer, size_t len, long p, long q)
    (p1,q1) x (p2,q2). Returns 0 if (p,q) is not a summand in this
    decomposition.
    Notation and conditions are based on arXiv:nucl-th/9511025 */
-long degeneracy(long p1, long q1, long p2, long q2, long p, long q)
+long degeneracy(long p, long q, long p1, long q1, long p2, long q2)
 {
     long x = p1 + p2 - p;
     long y = q1 + q2 - q;

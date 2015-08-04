@@ -37,42 +37,42 @@ TEST(degeneracy)
 {
     long d;
 
-#define TEST_DEGENERACY(p1, q1, p2, q2, p, q, expected) \
+#define TEST_DEGENERACY(p, q, p1, q1, p2, q2, expected) \
     do \
     { \
-        d = degeneracy(p1, q1, p2, q2, p, q); \
+        d = degeneracy(p, q, p1, q1, p2, q2); \
         DO_TEST(d == expected, \
             "Expected degeneracy(%d,%d,%d,%d,%d,%d)=%d, got %ld", \
-            p1, q1, p2, q2, p, q, expected, d); \
+            p, q, p1, q1, p2, q2, expected, d); \
     } while (0)
 
     /* We use the following test because it has most of the important features:
        27 x 27 -> 1 + 2x8 + 10 + 10bar + 3x27 + 28 + 28bar + 2x35 + 2x35bar
                 + 2x64 + 81 + 81bar + 125 */
-    TEST_DEGENERACY(2, 2, 2, 2, 0, 0, 1);
-    TEST_DEGENERACY(2, 2, 2, 2, 1, 1, 2);
-    TEST_DEGENERACY(2, 2, 2, 2, 3, 0, 1);
-    TEST_DEGENERACY(2, 2, 2, 2, 0, 3, 1);
+    TEST_DEGENERACY(0, 0, 2, 2, 2, 2, 1);
+    TEST_DEGENERACY(1, 1, 2, 2, 2, 2, 2);
+    TEST_DEGENERACY(3, 0, 2, 2, 2, 2, 1);
+    TEST_DEGENERACY(0, 3, 2, 2, 2, 2, 1);
     TEST_DEGENERACY(2, 2, 2, 2, 2, 2, 3);
-    TEST_DEGENERACY(2, 2, 2, 2, 6, 0, 1);
-    TEST_DEGENERACY(2, 2, 2, 2, 0, 6, 1);
-    TEST_DEGENERACY(2, 2, 2, 2, 4, 1, 2);
-    TEST_DEGENERACY(2, 2, 2, 2, 1, 4, 2);
-    TEST_DEGENERACY(2, 2, 2, 2, 3, 3, 2);
-    TEST_DEGENERACY(2, 2, 2, 2, 5, 2, 1);
-    TEST_DEGENERACY(2, 2, 2, 2, 2, 5, 1);
-    TEST_DEGENERACY(2, 2, 2, 2, 0, 6, 1);
+    TEST_DEGENERACY(6, 0, 2, 2, 2, 2, 1);
+    TEST_DEGENERACY(0, 6, 2, 2, 2, 2, 1);
+    TEST_DEGENERACY(4, 1, 2, 2, 2, 2, 2);
+    TEST_DEGENERACY(1, 4, 2, 2, 2, 2, 2);
+    TEST_DEGENERACY(3, 3, 2, 2, 2, 2, 2);
+    TEST_DEGENERACY(5, 2, 2, 2, 2, 2, 1);
+    TEST_DEGENERACY(2, 5, 2, 2, 2, 2, 1);
+    TEST_DEGENERACY(0, 6, 2, 2, 2, 2, 1);
 
     /* Also test some reps which shouldn't be included */
-    TEST_DEGENERACY(2, 2, 2, 2, 0, 1, 0);
-    TEST_DEGENERACY(2, 2, 2, 2, 4, 0, 0);
+    TEST_DEGENERACY(0, 1, 2, 2, 2, 2, 0);
+    TEST_DEGENERACY(4, 0, 2, 2, 2, 2, 0);
 
     /* Misc. other reps */
-    TEST_DEGENERACY(1, 1, 0, 0, 3, 0, 0);
-    TEST_DEGENERACY(1, 0, 0, 1, 1, 1, 1);
-    TEST_DEGENERACY(2, 0, 0, 1, 1, 0, 1);
-    TEST_DEGENERACY(2, 0, 0, 1, 2, 1, 1);
-    TEST_DEGENERACY(2, 0, 0, 1, 0, 2, 0);
+    TEST_DEGENERACY(3, 0, 1, 1, 0, 0, 0);
+    TEST_DEGENERACY(1, 1, 1, 0, 0, 1, 1);
+    TEST_DEGENERACY(1, 0, 2, 0, 0, 1, 1);
+    TEST_DEGENERACY(2, 1, 2, 0, 0, 1, 1);
+    TEST_DEGENERACY(0, 2, 2, 0, 0, 1, 0);
 
 #undef TEST_DEGENERACY
 }
@@ -93,7 +93,7 @@ void test_product_rep(long p1, long q1, long p2, long q2)
         for (q = 0; q <= upper-p; ++q)
         {
             long dim = dimension(p, q);
-            long d = degeneracy(p1, q1, p2, q2, p, q);
+            long d = degeneracy(p, q, p1, q1, p2, q2);
             if (d == 0) continue;
             size += dim * d;
         }
