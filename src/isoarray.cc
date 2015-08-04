@@ -31,11 +31,6 @@ isoarray::isoarray(long p, long q, long p1, long q1, long p2, long q2)
 
     size_t size = d * (p+3) * (q+3) * (p1+3) * (q1+3) * (p2+3);
     coefficients = new sqrat[size];
-
-    /* Check that the array is properly initialised.
-        TODO: Remove */
-    assert(coefficients[111].numerator() == 0);
-    assert(coefficients[111].denominator() == 1);
 }
 
 isoarray::~isoarray()
@@ -50,12 +45,12 @@ sqrat& isoarray::operator()(long n, long k, long l, long k1, long l1,
 {
     /* Bounds checks */
     assert((n >= 0) && (n < d));
-    assert((k >= q-1) && (k < p+q+1));
-    assert((l >= -1) && (l < q+1));
-    assert((k1 >= q1-1) && (k1 < p1+q1+1));
-    assert((l1 >= -1) && (l1 < q1+1));
-    assert((k2 >= q2-1) && (k2 < p2+q2+1));
-    assert((l2 >= -1) && (l2 < q2+1));
+    assert((k >= q-1) && (k < p+q+2));
+    assert((l >= -1) && (l < q+2));
+    assert((k1 >= q1-1) && (k1 < p1+q1+2));
+    assert((l1 >= -1) && (l1 < q1+2));
+    assert((k2 >= q2-1) && (k2 < p2+q2+2));
+    assert((l2 >= -1) && (l2 < q2+2));
 
     /* Check hypercharge conservation */
     assert(k1+l1+k2+l2 == (2*p1 + 2*p2 + 4*q1 + 4*q2 + p - q)/3);

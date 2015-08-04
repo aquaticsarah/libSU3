@@ -53,6 +53,10 @@ void sqrat::reduce()
 /* Various constructors */
 sqrat::sqrat(long num, long denom) : p(num), q(denom)
 {
+    /* Prevent division by zero */
+    if (denom == 0)
+        throw std::domain_error("Division by zero when constructing sqrat");
+
     reduce();
 }
 
