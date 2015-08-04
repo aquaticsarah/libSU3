@@ -43,6 +43,27 @@ public:
     char* tostring(char*, size_t);
 };
 
+/* A class to hold the isoscalar factors for a particular coupling */
+class isoarray
+{
+public:
+    /* Target and factor reps */
+    long p, q, p1, q1, p2, q2;
+
+    /* Degeneracy of target rep */
+    long d;
+
+    sqrat* coefficients;
+
+    isoarray(long p, long q, long p1, long q1, long p2, long q2);
+    ~isoarray();
+
+    /* We use operator() instead of operator[] as an easy way to use
+    multiple indices */
+    sqrat& operator()(long n, long k, long l, long k1, long l1,
+                        long k2, long l2);
+};
+
 /* Min and max for various numbers of arguments */
 long min(long a, long b);
 long min(long a, long b, long c);
@@ -54,5 +75,8 @@ long max(long a, long b, long c, long d, long e, long f);
 long dimension(long p, long q);
 char* repname(char* buffer, size_t len, long p, long q);
 long degeneracy(long p, long q, long p1, long q1, long p2, long q2);
+
+/* Main calculation function */
+void isoscalars(long p, long q, long p1, long q1, long p2, long q2);
 
 #endif

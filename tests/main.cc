@@ -18,6 +18,8 @@ void test_rep_sizes();
 
 int main()
 {
+    isoscalars(1,1,1,1,1,1);
+
     /* TODO: Autogenerate code like this for each top-level test */
     tests_run = 0;
     tests_passed = 0;
