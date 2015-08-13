@@ -1,0 +1,296 @@
+/* libSU3: Couplings to the state of highest weight
+   (that is, the state of highest I) */
+
+#include <stdio.h>
+#include <stdexcept>
+
+#include "SU3_internal.h"
+
+/* Use the A and B recursion relations to step along the
+   k1 and l1 axes within a plane.
+
+   The arguments identify the state to be calclated, *not* the values
+   of k1,l1,k2,l2 used in the recursion relation itself.
+*/
+void isoscalar_context::step_k1_up(long n, long s, long k1, long l1)
+{
+    long k2 = (A+s)/2 - k1, l2 = (A-s)/2 - l1;
+
+    /* Calculate coefficients for the A recursion relation */
+    sqrat a1, a2, a3, a4;
+    a_coefficients(k1, l1, k2+1, l2, a1, a2, a3, a4);
+
+    /* Calculate the value at (k1,l1,k2-1,l2) using surrounding values */
+    sqrat res = (-a1 * (*isf)(n, p+q, 0, k1-1, l1, k2+1, l2)
+                 -a3 * (*isf)(n, p+q, 0, k1, l1-1, k2+1, l2)
+                 -a4 * (*isf)(n, p+q, 0, k1, l1, k2+1, l2-1)) / a2;
+    (*isf)(n, p+q, 0, k1, l1, k2, l2) = res;
+}
+
+void isoscalar_context::step_k1_down(long n, long s, long k1, long l1)
+{
+    long k2 = (A+s)/2 - k1, l2 = (A-s)/2 - l1;
+
+    /* Calculate coefficients for the A recursion relation */
+    sqrat a1, a2, a3, a4;
+    a_coefficients(k1+1, l1, k2, l2, a1, a2, a3, a4);
+
+    /* Calculate the value at (k1-1,l1,k2,l2) using surrounding values */
+    sqrat res = (-a2 * (*isf)(n, p+q, 0, k1+1, l1, k2-1, l2)
+                 -a3 * (*isf)(n, p+q, 0, k1+1, l1-1, k2, l2)
+                 -a4 * (*isf)(n, p+q, 0, k1+1, l1, k2, l2-1)) / a1;
+    (*isf)(n, p+q, 0, k1, l1, k2, l2) = res;
+}
+
+void isoscalar_context::step_l1_up(long n, long s, long k1, long l1)
+{
+    long k2 = (A+s)/2 - k1, l2 = (A-s)/2 - l1;
+
+    /* Calculate coefficients for the B recursion relation */
+    sqrat b1, b2, b3, b4;
+    b_coefficients(k1, l1-1, k2, l2, b1, b2, b3, b4);
+
+    /* Calculate the value at (k1,l1,k2,l2) using surrounding values */
+    sqrat res = (-b1 * (*isf)(n, p+q, 0, k1+1, l1-1, k2, l2)
+                 -b2 * (*isf)(n, p+q, 0, k1, l1-1, k2+1, l2)
+                 -b4 * (*isf)(n, p+q, 0, k1, l1-1, k2, l2+1)) / b3;
+    (*isf)(n, p+q, 0, k1, l1, k2, l2) = res;
+}
+
+void isoscalar_context::step_l1_down(long n, long s, long k1, long l1)
+{
+    long k2 = (A+s)/2 - k1, l2 = (A-s)/2 - l1;
+
+    /* Calculate coefficients for the B recursion relation */
+    sqrat b1, b2, b3, b4;
+    b_coefficients(k1, l1, k2, l2-1, b1, b2, b3, b4);
+
+    /* Calculate the value at (k1,l1,k2,l2) using surrounding values */
+    sqrat res = (-b1 * (*isf)(n, p+q, 0, k1+1, l1, k2, l2-1)
+                 -b2 * (*isf)(n, p+q, 0, k1, l1, k2+1, l2-1)
+                 -b3 * (*isf)(n, p+q, 0, k1, l1+1, k2, l2-1)) / b4;
+    (*isf)(n, p+q, 0, k1, l1, k2, l2) = res;
+}
+
+/* Step down from one plane (at s+2) to the next plane (at s).
+   Sometimes this can fail, in which case you need to conjugate all reps,
+   try again (this will always succeed in this case) and then use symmetries
+   to extract the original coupling coefficients.
+
+   Note: When doing this, there are two independent choices we can make:
+
+   * We can try to calculate the value at (k1max,l1min) or at (k1min,l1max)
+     (these require different steps afterwards)
+
+   * We can try recursion relation A or recursion relation B
+     (these require the same steps afterwards)
+
+   Each of these works in different cases, so we try all four combinations.
+
+   Internally, we use the step_k1_up/down and step_l1_up/down functions,
+   but we step "from" a non-existent state (with k1,l1 not in the valid range)
+   to the state we want. This works because 'isoscalar_array' allows us to
+   request (certain) non-existent states and just returns 0 for the coupling
+   coefficient. This is exactly what we need for the stepping to work properly.
+*/
+int isoscalar_context::step_s_down(long n, long s,
+        long k1min, long k1max, long l1min, long l1max)
+{
+    /* Try the four different possibilities */
+    try
+    {
+        step_k1_up(n, s, k1min, l1max);
+    }
+    catch (std::domain_error& e)
+    {
+        try
+        {
+            step_l1_down(n, s, k1min, l1max);
+        }
+        catch (std::domain_error& e)
+        {
+            /* Stepping to (k1min, l1max) failed, so try (k1max, l1min) */
+            try
+            {
+                step_k1_down(n, s, k1max, l1min);
+            }
+            catch (std::domain_error& e)
+            {
+                try
+                {
+                    step_l1_up(n, s, k1max, l1min);
+                }
+                catch (std::domain_error& e)
+                {
+                    return 0;
+                }
+            }
+
+            /* If we get here, we succeded at (k1max, l1min).
+                So fill out the rest of this plane from this point. */
+            long k1, l1;
+            for (l1 = l1min+1; l1 <= l1max; ++l1)
+                step_l1_up(n, s, k1max, l1);
+
+            for (k1 = k1max-1; k1 >= k1min; --k1)
+            {
+                step_k1_down(n, s, k1, l1min);
+                for (l1 = l1min+1; l1 <= l1max; ++l1)
+                    step_l1_up(n, s, k1, l1);
+            }
+
+            return 1;
+        }
+    }
+
+    /* If we get here, we succeded at (k1min, l1max).
+        So fill out the rest of this plane from this point. */
+    long k1, l1;
+    for (l1 = l1max-1; l1 >= l1min; --l1)
+        step_l1_down(n, s, k1min, l1);
+
+    for (k1 = k1min+1; k1 <= k1max; ++k1)
+    {
+        step_k1_up(n, s, k1, l1max);
+        for (l1 = l1max-1; l1 >= l1min; --l1)
+            step_l1_down(n, s, k1, l1);
+    }
+
+    return 1;
+}
+
+/* Calculate the inner product of two sets of isoscalar factors */
+sqrat isoscalar_context::inner_product(long m, long n)
+{
+    long k1, l1, k2, l2;
+    sqrat result = sqrat(0);
+
+    for (k1 = q1; k1 <= p1+q1; ++k1)
+        for (l1 = 0; l1 <= q1; ++l1)
+            for (k2 = q2; k2 <= p2+q2; ++k2)
+            {
+                /* Some states cannot couple due to hypercharge conservation;
+                    ignore those */
+                l2 = A - (k1+l1+k2);
+                if ((l2 < 0) || (l2 > q2)) continue;
+
+                result += (*isf)(m, p+q, 0, k1, l1, k2, l2)
+                        * (*isf)(n, p+q, 0, k1, l1, k2, l2);
+            }
+
+    return result;
+}
+
+/* Calculate couplings to the state of highest weight.
+    Returns 1 on success, 0 if we need to try again with
+    the reps conjugated. */
+int isoscalar_context::calc_shw()
+{
+    long smax = min(A, (2*q1 + 2*q2 + 4*p1 + 4*p2 + q - p)/3);
+    long smin = max(p + q, 2*q1 + 2*q2 - A);
+
+    long k1min, k1max, l1min, l1max;
+    long k1, l1, k2, l2;
+
+    /* Fill out the topmost d planes for each of the degenerate reps */
+    long m, n, s;
+    for (m = 0; m < d; ++m)
+    {
+        s = smax - 2*m;
+        k1min = max(q1, (A + s)/2 - (p2+q2));
+        k1max = min(p1+q1, (A + s)/2 - q2);
+        l1min = max(0, (A - s)/2 - q2);
+        l1max = min(q1, (A - s)/2);
+
+        /* Set one ISF in one particular irrep (leaving the same ISF
+           in the other irreps as zero) */
+        (*isf)(m, p+q, 0, k1min, l1min, (A+s)/2 - k1min, (A-s)/2 - l1min) = 1;
+
+        for (n = 0; n < d; ++n)
+        {
+            /* Use recursion relations (possibly involving the plane
+               above the current one, which will already have been filled)
+               to fill out the rest of this plane */
+
+            /* First fill across, from (k1min, l1min) to (k1min, l1max) */
+            for (l1 = l1min+1; l1 <= l1max; ++l1)
+                step_l1_up(n, s, k1min, l1);
+
+            /* Now step upwards through the rows, from k1min to k1max */
+            for (k1 = k1min+1; k1 <= k1max; ++k1)
+            {
+                step_k1_up(n, s, k1, l1min);
+                for (l1 = l1min+1; l1 <= l1max; ++l1)
+                    step_l1_up(n, s, k1, l1);
+            }
+        }
+    }
+
+    /* Now we have filled out the topmost d planes, step down
+       through the rest of them */
+    for (s = smax - 2*d; s >= smin; s -= 2)
+    {
+        k1min = max(q1, (A + s)/2 - (p2+q2));
+        k1max = min(p1+q1, (A + s)/2 - q2);
+        l1min = max(0, (A - s)/2 - q2);
+        l1max = min(q1, (A - s)/2);
+
+        fprintf(stderr,
+            "(%ld,%ld)x(%ld,%ld) -> (%ld,%ld):\n"
+            "Stepping down to s=%ld; k1min=%ld, k1max=%ld, l1min=%ld, l1max=%ld\n\n",
+            p1, q1, p2, q2, p, q, s, k1min, k1max, l1min, l1max);
+
+        for (n = 0; n < d; ++n)
+        {
+            /* Try to step down, exiting if it fails */
+            if (! step_s_down(n, s, k1min, k1max, l1min, l1max))
+            {
+                /* If we get here, the stepdown algorithm failed, and we need to
+                   try again with the reps conjugated */
+                return 0;
+            }
+        }
+    }
+
+    /* Orthonormalise the ISFs for different representations. */
+    for (n = 0; n < d; ++n)
+    {
+        sqrat v;
+        /* Note: We orthogonalise against higher reps in order to agree with
+           existing results. TODO: Check if this always works. */
+        for (m = n+1; m < d; ++m)
+        {
+            /* Factor to multiply rep 'm' by when subtracting from rep 'n' */
+            v = inner_product(m, n) / inner_product(m, m);
+
+            for (k1 = q1; k1 <= p1+q1; ++k1)
+                for (l1 = 0; l1 <= q1; ++l1)
+                    for (k2 = q2; k2 <= p2+q2; ++k2)
+                    {
+                        /* Some states cannot couple due to hypercharge conservation;
+                            ignore those */
+                        l2 = A - (k1+l1+k2);
+                        if ((l2 < 0) || (l2 > q2)) continue;
+
+                        (*isf)(n, p+q, 0, k1, l1, k2, l2) -= v * (*isf)(m, p+q, 0, k1, l1, k2, l2);
+                    }
+        }
+
+        /* Normalisation */
+        v = sqrt(inner_product(n, n));
+
+        for (k1 = q1; k1 <= p1+q1; ++k1)
+            for (l1 = 0; l1 <= q1; ++l1)
+                for (k2 = q2; k2 <= p2+q2; ++k2)
+                {
+                    /* Some states cannot couple due to hypercharge conservation;
+                        ignore those */
+                    l2 = A - (k1+l1+k2);
+                    if ((l2 < 0) || (l2 > q2)) continue;
+
+                    (*isf)(n, p+q, 0, k1, l1, k2, l2) /= v;
+                }
+    }
+
+    return 1;
+}

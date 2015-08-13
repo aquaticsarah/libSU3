@@ -2,7 +2,7 @@
 
 #include <assert.h>
 
-#include "SU3.h"
+#include "SU3_internal.h"
 
 /* Notes on indexing:
    - For each of the three reps involved, we have the following ranges:

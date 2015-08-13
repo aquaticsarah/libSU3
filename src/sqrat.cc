@@ -1,9 +1,10 @@
 /* libSU3: Type representing (+ or -) the square root of a rational */
 
 #include <stdio.h>
+#include <math.h>
 #include <stdexcept>
 
-#include "SU3.h"
+#include "SU3_internal.h"
 
 /* Helper: Calculate sign(x) * x^2 */
 static long sign_square(long x)
@@ -17,14 +18,26 @@ static long sign_square(long x)
 static long isqrt(long x)
 {
     if (x < 0) throw std::domain_error("Value is not a square");
-    /* TODO: Possibly optimise this? */
-    long v = 0;
-    while (1)
+
+    /* Use doubles to get an approximation to sqrt(x).
+        We can guarantee that this approximation is within
+        +-1 of the true value */
+    long approx = lrint(sqrt((double)x));
+    long approx_sq = approx * approx;
+
+    if (approx_sq < x)
     {
-        if (v*v > x) throw std::domain_error("Value is not a square");
-        else if (v*v == x) return v;
-        ++v;
+        if ((approx+1)*(approx+1) == x)
+            return approx+1;
+        else throw std::domain_error("Value is not a square");
     }
+    else if (approx_sq > x)
+    {
+        if ((approx-1)*(approx-1) == x)
+            return approx-1;
+        else throw std::domain_error("Value is not a square");
+    }
+    else return approx;
 }
 
 /* Reduce a fraction to its lowest terms */
@@ -70,7 +83,7 @@ long sqrat::denominator()
     return q;
 }
 
-/* Unary plus and minus */
+/* Unary operators */
 sqrat sqrat::operator+()
 {
     return sqrat(p, q);
@@ -110,6 +123,11 @@ sqrat* sqrat::operator*=(long other)
     return this;
 }
 
+sqrat operator*(long left, sqrat right)
+{
+    return sqrat(left) * right;
+}
+
 
 
 sqrat sqrat::operator/(sqrat other)
@@ -136,6 +154,11 @@ sqrat* sqrat::operator/=(long other)
     p = res.p;
     q = res.q;
     return this;
+}
+
+sqrat operator/(long left, sqrat right)
+{
+    return sqrat(left) / right;
 }
 
 /* Addition and subtraction are a bit more complicated.
@@ -210,6 +233,11 @@ sqrat* sqrat::operator+=(long other)
     return this;
 }
 
+sqrat operator+(long left, sqrat right)
+{
+    return sqrat(left) + right;
+}
+
 
 
 sqrat sqrat::operator-(sqrat other)
@@ -249,6 +277,11 @@ sqrat* sqrat::operator-=(long other)
     p = res.p;
     q = res.q;
     return this;
+}
+
+sqrat operator-(long left, sqrat right)
+{
+    return sqrat(left) - right;
 }
 
 

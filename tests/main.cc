@@ -16,6 +16,41 @@ void test_dimension();
 void test_degeneracy();
 void test_rep_sizes();
 
+void print_isoscalars(long p, long q, long p1, long q1, long p2, long q2)
+{
+    long d = degeneracy(p, q, p1, q1, p2, q2);
+    if (d == 0) return;
+
+    isoarray* isf = isoscalars(p, q, p1, q1, p2, q2);
+
+    long n, k, l, k1, l1, k2, l2;
+    char buf[64];
+
+    for (n = 0; n < d; ++n)
+    {
+        printf("Degenerate rep %ld:\n", n);
+
+        /* For now, only look at the state of highest weight */
+        k = p+q; l = 0;
+
+        for (k1 = q1; k1 <= p1+q1; ++k1)
+            for (l1 = 0; l1 <= q1; ++l1)
+                for (k2 = q2; k2 <= p2+q2; ++k2)
+                {
+                    l2 = (2*p1 + 2*p2 + 4*q1 + 4*q2 + p - q)/3 - (k1 + l1 + k2);
+                    if ((l2 < 0) || (l2 > q2)) continue;
+
+                    sqrat val = (*isf)(n, k, l, k1, l1, k2, l2);
+                    val.tostring(buf, 64);
+                    printf("    (%ld,%ld) : (%ld,%ld) x (%ld,%ld) = %s\n",
+                        k, l, k1, l1, k2, l2, buf);
+                }
+        printf("\n");
+    }
+
+    delete isf;
+}
+
 int main()
 {
 #if 0
@@ -32,8 +67,12 @@ int main()
     fprintf(stderr, "Isoscalar calculations okay\n");
 #else
     /* Decompose 3 x 3bar -> 1 + 8 and print coefficients */
-    isoscalars(0,0,1,0,0,1);
-    isoscalars(1,1,1,0,0,1);
+    print_isoscalars(0,0,1,0,0,1);
+    print_isoscalars(1,1,1,0,0,1);
+
+    /* Also try 8 x 8 -> 8 */
+    print_isoscalars(1,1,1,1,1,1);
+
     fprintf(stderr, "Isoscalar calculations okay\n");
 #endif
 

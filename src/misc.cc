@@ -1,5 +1,7 @@
 /* libSU3: Miscellaneous helper functions */
 
+#include "SU3_internal.h"
+
 /* Min and max for various numbers of arguments */
 long min(long a, long b)
 {

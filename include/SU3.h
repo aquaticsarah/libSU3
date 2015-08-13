@@ -5,14 +5,6 @@
 
 #include <stddef.h>
 
-/* Various useful functions */
-long min(long a, long b);
-long min(long a, long b, long c);
-long min(long a, long b, long c, long d);
-long max(long a, long b);
-long max(long a, long b, long c, long d, long e, long f);
-long gcd(long, long);
-
 /* Class to represent (+ or -) the square root of a rational.
     The actual value represented is (sign(p) * sqrt(|p| / q))
 */
@@ -31,10 +23,10 @@ public:
     long numerator();
     long denominator();
 
+    /* Arithmetic operations */
     sqrat operator+();
     sqrat operator-();
 
-    /* Arithmetic operations */
     sqrat operator*(sqrat);
     sqrat operator*(long);
     sqrat* operator*=(sqrat);
@@ -60,6 +52,12 @@ public:
     /* Convert to a string */
     char* tostring(char*, size_t);
 };
+
+/* Reversed arithmetic operators */
+sqrat operator*(long, sqrat);
+sqrat operator/(long, sqrat);
+sqrat operator+(long, sqrat);
+sqrat operator-(long, sqrat);
 
 /* A class to hold the isoscalar factors for a particular coupling */
 class isoarray
@@ -88,6 +86,6 @@ char* repname(char* buffer, size_t len, long p, long q);
 long degeneracy(long p, long q, long p1, long q1, long p2, long q2);
 
 /* Main calculation function */
-void isoscalars(long p, long q, long p1, long q1, long p2, long q2);
+isoarray* isoscalars(long p, long q, long p1, long q1, long p2, long q2);
 
 #endif

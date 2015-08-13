@@ -17,7 +17,12 @@ DIRS := $(sort $(dir $(OBJ) $(DEP) $(TEST_OBJ) $(TEST_DEP)))
 # Toolchain
 CC := g++ -c
 CFLAGS := -Wall -Wextra -Werror
+
+# Include lists for library code and for the tests
+# (each of which has internal headers which shouldn't be used
+#  by the other)
 INCLUDE := -I include/
+LIB_INCLUDE := $(INCLUDE) -I src/
 TEST_INCLUDE := $(INCLUDE) -I tests/
 
 LD := g++
@@ -53,11 +58,11 @@ run-tests: $(TEST_OBJ) libSU3.a
 # Rules to build object files and dependency information
 $(OBJ):$(BUILDDIR)/%.o: src/%.cc | $(DIRS)
 	@echo "CC $<"
-	@$(CC) $(CFLAGS) $(INCLUDE) $< -o $@
+	@$(CC) $(CFLAGS) $(LIB_INCLUDE) $< -o $@
 
 $(DEP):$(BUILDDIR)/%.d: src/%.cc | $(DIRS)
 	@echo "MKDEP $<"
-	@$(MKDEP) $(INCLUDE) $< -MQ $(BUILDDIR)/$*.o -MQ $@ -MF $@
+	@$(MKDEP) $(LIB_INCLUDE) $< -MQ $(BUILDDIR)/$*.o -MQ $@ -MF $@
 
 $(TEST_OBJ):$(BUILDDIR)/tests/%.o: tests/%.cc | $(DIRS)
 	@echo "CC $<"

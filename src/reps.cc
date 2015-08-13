@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#include "SU3.h"
+#include "SU3_internal.h"
 
 /* Calculate the dimension of one irrep */
 long dimension(long p, long q)
