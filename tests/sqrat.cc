@@ -72,4 +72,8 @@ TEST(sqrat_arithmetic)
 
     c = d - b;
     TEST_EQ_SQRAT(c, -8, 3, "-sqrt(2/3) - sqrt(2/3)");
+
+    /* Square-roots */
+    c = sqrt(sqrat(1, 9));
+    TEST_EQ_SQRAT(c, 1, 3, "sqrt(sqrt(1/9))");
 }

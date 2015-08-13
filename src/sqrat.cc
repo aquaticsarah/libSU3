@@ -16,7 +16,7 @@ static long sign_square(long x)
     Raises an exception if the values is not a square */
 static long isqrt(long x)
 {
-    if (x < 0) return -1;
+    if (x < 0) throw std::domain_error("Value is not a square");
     /* TODO: Possibly optimise this? */
     long v = 0;
     while (1)
@@ -94,6 +94,24 @@ sqrat sqrat::operator*(long other)
     return *this * sqrat(other);
 }
 
+sqrat* sqrat::operator*=(sqrat other)
+{
+    sqrat res = *this * other;
+    p = res.p;
+    q = res.q;
+    return this;
+}
+
+sqrat* sqrat::operator*=(long other)
+{
+    sqrat res = *this * other;
+    p = res.p;
+    q = res.q;
+    return this;
+}
+
+
+
 sqrat sqrat::operator/(sqrat other)
 {
     return sqrat(p * other.q, q * other.p);
@@ -102,6 +120,22 @@ sqrat sqrat::operator/(sqrat other)
 sqrat sqrat::operator/(long other)
 {
     return *this / sqrat(other);
+}
+
+sqrat* sqrat::operator/=(sqrat other)
+{
+    sqrat res = *this / other;
+    p = res.p;
+    q = res.q;
+    return this;
+}
+
+sqrat* sqrat::operator/=(long other)
+{
+    sqrat res = *this / other;
+    p = res.p;
+    q = res.q;
+    return this;
 }
 
 /* Addition and subtraction are a bit more complicated.
@@ -160,6 +194,24 @@ sqrat sqrat::operator+(long other)
     return *this + sqrat(other);
 }
 
+sqrat* sqrat::operator+=(sqrat other)
+{
+    sqrat res = *this + other;
+    p = res.p;
+    q = res.q;
+    return this;
+}
+
+sqrat* sqrat::operator+=(long other)
+{
+    sqrat res = *this + other;
+    p = res.p;
+    q = res.q;
+    return this;
+}
+
+
+
 sqrat sqrat::operator-(sqrat other)
 {
     if (p >= 0)
@@ -181,6 +233,29 @@ sqrat sqrat::operator-(sqrat other)
 sqrat sqrat::operator-(long other)
 {
     return *this - sqrat(other);
+}
+
+sqrat* sqrat::operator-=(sqrat other)
+{
+    sqrat res = *this - other;
+    p = res.p;
+    q = res.q;
+    return this;
+}
+
+sqrat* sqrat::operator-=(long other)
+{
+    sqrat res = *this - other;
+    p = res.p;
+    q = res.q;
+    return this;
+}
+
+
+
+sqrat sqrt(sqrat v)
+{
+    return sqrat(isqrt(v.p), isqrt(v.q));
 }
 
 /* Convert to a string */

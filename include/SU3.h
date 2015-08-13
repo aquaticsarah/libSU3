@@ -37,15 +37,25 @@ public:
     /* Arithmetic operations */
     sqrat operator*(sqrat);
     sqrat operator*(long);
+    sqrat* operator*=(sqrat);
+    sqrat* operator*=(long);
 
     sqrat operator/(sqrat);
     sqrat operator/(long);
+    sqrat* operator/=(sqrat);
+    sqrat* operator/=(long);
 
     sqrat operator+(sqrat);
     sqrat operator+(long);
+    sqrat* operator+=(sqrat);
+    sqrat* operator+=(long);
 
     sqrat operator-(sqrat);
     sqrat operator-(long);
+    sqrat* operator-=(sqrat);
+    sqrat* operator-=(long);
+
+    friend sqrat sqrt(sqrat);
 
     /* Convert to a string */
     char* tostring(char*, size_t);

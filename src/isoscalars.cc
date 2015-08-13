@@ -35,6 +35,8 @@ class isoscalar_context
     int step_s_down_bottomright(long n, long s,
             long k1min, long k1max, long l1min, long l1max);
 
+    sqrat inner_product(long m, long n);
+
 protected:
     isoscalar_context(isoarray* isf, long p, long q, long p1,
                     long q1, long p2, long q2);
@@ -284,6 +286,26 @@ int isoscalar_context::step_s_down_bottomright(long n, long s,
     return 1;
 }
 
+/* Calculate the inner product of two sets of isoscalar factors */
+sqrat isoscalar_context::inner_product(long m, long n)
+{
+    long A = (2*p1 + 2*p2 + 4*q1 + 4*q2 + p - q)/3;
+
+    long k1, l1, k2, l2;
+    sqrat result = sqrat(0);
+
+    for (k1 = q1; k1 <= p1+q1; ++k1)
+        for (l1 = 0; l1 <= q1; ++l1)
+            for (k2 = q2; k2 <= p2+q2; ++k2)
+            {
+                l2 = A - (k1+l1+k2);
+                result += (*isf)(m, p+q, 0, k1, l1, k2, l2)
+                        * (*isf)(n, p+q, 0, k1, l1, k2, l2);
+            }
+
+    return result;
+}
+
 /* Calculate couplings to the state of highest weight.
     Returns 1 on success, 0 if we need to try again with
     the reps conjugated. */
@@ -294,6 +316,7 @@ int isoscalar_context::calc_shw()
     long smin = max(p + q, 2*q1 + 2*q2 - A);
 
     long k1min, k1max, l1min, l1max;
+    long k1, l1, k2, l2;
 
     /* Fill out the topmost d planes for each of the degenerate reps */
     long m, n, s;
@@ -316,7 +339,6 @@ int isoscalar_context::calc_shw()
                to fill out the rest of this plane */
 
             /* First fill across, from (k1min, l1min) to (k1min, l1max) */
-            long k1, l1;
             for (l1 = l1min+1; l1 <= l1max; ++l1)
                 step_l1_up(n, k1min, l1, (A+s)/2 - k1min, (A-s)/2 - l1);
 
@@ -357,8 +379,37 @@ int isoscalar_context::calc_shw()
         }
     }
 
-    /* Orthonormalise */
-    /* TODO */
+    /* Orthonormalise the ISFs for different representations. */
+    for (n = 0; n < d; ++n)
+    {
+        sqrat v;
+        /* Note: We orthogonalise against higher reps in order to agree with
+           existing results. TODO: Check if this always works. */
+        for (m = n+1; m < d; ++m)
+        {
+            /* Factor to multiply rep 'm' by when subtracting from rep 'n' */
+            v = inner_product(m, n) / inner_product(m, m);
+
+            for (k1 = q1; k1 <= p1+q1; ++k1)
+                for (l1 = 0; l1 <= q1; ++l1)
+                    for (k2 = q2; k2 <= p2+q2; ++k2)
+                    {
+                        l2 = A - (k1+l1+k2);
+                        (*isf)(n, p+q, 0, k1, l1, k2, l2) -= v * (*isf)(m, p+q, 0, k1, l1, k2, l2);
+                    }
+        }
+
+        /* Normalisation */
+        v = sqrt(inner_product(n, n));
+
+        for (k1 = q1; k1 <= p1+q1; ++k1)
+            for (l1 = 0; l1 <= q1; ++l1)
+                for (k2 = q2; k2 <= p2+q2; ++k2)
+                {
+                    l2 = A - (k1+l1+k2);
+                    (*isf)(n, p+q, 0, k1, l1, k2, l2) /= v;
+                }
+    }
 
     return 1;
 }
@@ -372,6 +423,7 @@ void isoscalars(long p, long q, long p1, long q1, long p2, long q2)
     isoscalar_context* ctx = new isoscalar_context(isf,p,q,p1,q1,p2,q2);
 
     ctx->calc_shw();
+    /* TODO: Deal with the case where we need to use the conjugated reps */
 
     /* TODO: Calculate the rest of the ISFs, given those for the SHW */
 
