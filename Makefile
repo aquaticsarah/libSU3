@@ -12,7 +12,21 @@ TEST_OBJ := $(TEST_SRC:tests/%.cc=$(BUILDDIR)/tests/%.o)
 DEP := $(SRC:src/%.cc=$(BUILDDIR)/%.d)
 TEST_DEP := $(TEST_SRC:tests/%.cc=$(BUILDDIR)/tests/%.d)
 
-DIRS := $(sort $(dir $(OBJ) $(DEP) $(TEST_OBJ) $(TEST_DEP)))
+TEST_RUNNER := $(BUILDDIR)/tests/run.cc
+TEST_RUNNER_OBJ := $(BUILDDIR)/tests/run.o
+TEST_RUNNER_DEP := $(BUILDDIR)/tests/run.d
+
+BUILD_FILES := $(OBJ) $(DEP)
+TEST_FILES := $(TEST_OBJ) $(TEST_DEP) $(TEST_RUNNER) $(TEST_RUNNER_OBJ) $(TEST_RUNNER_DEP)
+
+# Only build the files we need
+ifeq ($(findstring test,$(MAKECMDGOALS)),)
+FILES := $(BUILD_FILES)
+else
+FILES := $(BUILD_FILES) $(TEST_FILES)
+endif
+
+DIRS := $(sort $(dir $(FILES)))
 
 # Toolchain
 CC := g++ -c
@@ -51,9 +65,9 @@ libSU3.a: $(OBJ)
 	@ar rcsu $@ $(OBJ)
 
 # Intermediate targets
-run-tests: $(TEST_OBJ) libSU3.a
+run-tests: $(TEST_OBJ) $(TEST_RUNNER_OBJ) libSU3.a
 	@echo "Linking test driver"
-	@$(LD) $(LDFLAGS) $(TEST_OBJ) libSU3.a -o $@
+	@$(LD) $(LDFLAGS) $(TEST_OBJ) $(TEST_RUNNER_OBJ) libSU3.a -o $@
 
 # Rules to build object files and dependency information
 $(OBJ):$(BUILDDIR)/%.o: src/%.cc | $(DIRS)
@@ -72,6 +86,19 @@ $(TEST_DEP):$(BUILDDIR)/tests/%.d: tests/%.cc | $(DIRS)
 	@echo "MKDEP $<"
 	@$(MKDEP) $(TEST_INCLUDE) $< -MQ $(BUILDDIR)/tests/$*.o -MQ $@ -MF $@
 
+# The test runner file needs its own rules
+$(TEST_RUNNER): scripts/gen_test_runner.py tests/*.cc | $(DIRS)
+	@echo "Generating test runner ($@)..."
+	@scripts/gen_test_runner.py $@
+
+$(TEST_RUNNER_OBJ): $(TEST_RUNNER) | $(DIRS)
+	@echo "CC $<"
+	@$(CC) $(CFLAGS) $(TEST_INCLUDE) $< -o $@
+
+$(TEST_RUNNER_DEP): $(TEST_RUNNER) | $(DIRS)
+	@echo "MKDEP $<"
+	@$(MKDEP) $(TEST_INCLUDE) $< -MQ $(BUILDDIR)/tests/$*.o -MQ $@ -MF $@
+
 # Directory tree
 $(DIRS):
 	@mkdir -p $@
@@ -82,5 +109,5 @@ ifeq ($(findstring clean,$(MAKECMDGOALS)),)
 endif
 
 ifneq ($(findstring test,$(MAKECMDGOALS)),)
--include $(TEST_DEP)
+-include $(TEST_DEP) $(TEST_RUNNER_DEP)
 endif
