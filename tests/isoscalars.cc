@@ -5,6 +5,30 @@
 #include "SU3.h"
 #include "test.h"
 
+/* Check the values for 3 x 3bar -> 1 + 8.
+    Note that a lot of combinations are ruled out by hypercharge,
+    so we don't check those here. */
+TEST(3x3bar)
+{
+    isoarray* isf;
+
+    /* Check the singlet part of the decomposition */
+    isf = isoscalars(0, 0, 1, 0, 0, 1);
+                    //   n  k  l k1 l1 k2 l2  num denom
+    TEST_EQ_SQRAT((*isf)(0, 0, 0, 0, 0, 1, 1), -1, 3, "(0,0): (0,0) x (1,1)");
+    TEST_EQ_SQRAT((*isf)(0, 0, 0, 1, 0, 1, 0),  2, 3, "(0,0): (1,0) x (1,0)");
+
+    /* Check the octet part of the decomposition */
+    isf = isoscalars(1, 1, 1, 0, 0, 1);
+                    //   n  k  l k1 l1 k2 l2  num denom
+    TEST_EQ_SQRAT((*isf)(0, 1, 0, 0, 0, 1, 0), 1, 1, "(1,0): (0,0) x (1,0)");
+    TEST_EQ_SQRAT((*isf)(0, 1, 1, 0, 0, 1, 1), 2, 3, "(1,1): (0,0) x (1,1)");
+    TEST_EQ_SQRAT((*isf)(0, 1, 1, 1, 0, 1, 0), 1, 3, "(1,1): (1,0) x (1,0)");
+    TEST_EQ_SQRAT((*isf)(0, 2, 0, 0, 0, 1, 1), 0, 1, "(2,0): (0,0) x (1,1)");
+    TEST_EQ_SQRAT((*isf)(0, 2, 0, 1, 0, 1, 0), 1, 1, "(2,0): (1,0) x (1,0)");
+    TEST_EQ_SQRAT((*isf)(0, 2, 1, 1, 0, 1, 1), 1, 1, "(2,1): (1,0) x (1,1)");
+}
+
 void print_isoscalars(long p, long q, long p1, long q1, long p2, long q2)
 {
     long d = degeneracy(p, q, p1, q1, p2, q2);
@@ -56,11 +80,6 @@ TEST(isoscalars)
                             isoscalars(p1,q1,p2,q2,p,q);
     fprintf(stderr, "Isoscalar calculations okay\n");
 #else
-    /* Decompose 3 x 3bar -> 1 + 8 and print coefficients */
-    print_isoscalars(0,0,1,0,0,1);
-    print_isoscalars(1,1,1,0,0,1);
-
-    /* Also try 8 x 8 -> 8 */
     print_isoscalars(1,1,1,1,1,1);
 
     fprintf(stderr, "Isoscalar calculations okay\n");

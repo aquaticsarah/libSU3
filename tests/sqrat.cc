@@ -3,19 +3,6 @@
 #include "SU3.h"
 #include "test.h"
 
-/* Helper for tests involving the sqrat type
-   (tests if a == sqrat(p,q)). "thing" is what the calculation
-   is supposed to represent */
-#define TEST_EQ_SQRAT(a, p, q, thing) \
-    do \
-    { \
-        char abuf[64], pqbuf[64]; \
-        a.tostring(abuf, 64); \
-        sqrat(p,q).tostring(pqbuf, 64); \
-        DO_TEST((a.numerator() == p) && (a.denominator() == q), \
-            "Expected %s == %s, got %s", thing, pqbuf, abuf); \
-    } while (0)
-
 TEST(sqrat)
 {
     /* Test reduction */

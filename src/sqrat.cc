@@ -291,7 +291,7 @@ sqrat sqrt(sqrat v)
     return sqrat(isqrt(v.p), isqrt(v.q));
 }
 
-/* Convert to a string */
+/* Conversions to various types */
 char* sqrat::tostring(char* buffer, size_t len)
 {
     if (p < 0)
@@ -299,4 +299,9 @@ char* sqrat::tostring(char* buffer, size_t len)
     else
         snprintf(buffer, len, "sqrt(%ld/%ld)", p, q);
     return buffer;
+}
+
+double sqrat::todouble()
+{
+    return sqrt(p / (double)q);
 }

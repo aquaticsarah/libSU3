@@ -20,7 +20,7 @@ void isoscalar_context::step_k1_up(long n, long s, long k1, long l1)
     sqrat a1, a2, a3, a4;
     a_coefficients(k1, l1, k2+1, l2, a1, a2, a3, a4);
 
-    /* Calculate the value at (k1,l1,k2-1,l2) using surrounding values */
+    /* Calculate the value at (k1,l1,k2,l2) using surrounding values */
     sqrat res = (-a1 * (*isf)(n, p+q, 0, k1-1, l1, k2+1, l2)
                  -a3 * (*isf)(n, p+q, 0, k1, l1-1, k2+1, l2)
                  -a4 * (*isf)(n, p+q, 0, k1, l1, k2+1, l2-1)) / a2;
@@ -35,7 +35,7 @@ void isoscalar_context::step_k1_down(long n, long s, long k1, long l1)
     sqrat a1, a2, a3, a4;
     a_coefficients(k1+1, l1, k2, l2, a1, a2, a3, a4);
 
-    /* Calculate the value at (k1-1,l1,k2,l2) using surrounding values */
+    /* Calculate the value at (k1,l1,k2,l2) using surrounding values */
     sqrat res = (-a2 * (*isf)(n, p+q, 0, k1+1, l1, k2-1, l2)
                  -a3 * (*isf)(n, p+q, 0, k1+1, l1-1, k2, l2)
                  -a4 * (*isf)(n, p+q, 0, k1+1, l1, k2, l2-1)) / a1;

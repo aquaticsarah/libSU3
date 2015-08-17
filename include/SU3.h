@@ -49,8 +49,9 @@ public:
 
     friend sqrat sqrt(sqrat);
 
-    /* Convert to a string */
+    /* Conversions to various types */
     char* tostring(char*, size_t);
+    double todouble();
 };
 
 /* Reversed arithmetic operators */
