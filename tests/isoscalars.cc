@@ -1,4 +1,4 @@
-/* libSU3: Test driver */
+/* libSU3: Tests for isoscalar factor calculations */
 
 #include <stdio.h>
 
@@ -18,6 +18,8 @@ TEST(3x3bar)
     TEST_EQ_SQRAT((*isf)(0, 0, 0, 0, 0, 1, 1), -1, 3, "(0,0): (0,0) x (1,1)");
     TEST_EQ_SQRAT((*isf)(0, 0, 0, 1, 0, 1, 0),  2, 3, "(0,0): (1,0) x (1,0)");
 
+    delete isf;
+
     /* Check the octet part of the decomposition */
     isf = isoscalars(1, 1, 1, 0, 0, 1);
                     //   n  k  l k1 l1 k2 l2  num denom
@@ -27,6 +29,8 @@ TEST(3x3bar)
     TEST_EQ_SQRAT((*isf)(0, 2, 0, 0, 0, 1, 1), 0, 1, "(2,0): (0,0) x (1,1)");
     TEST_EQ_SQRAT((*isf)(0, 2, 0, 1, 0, 1, 0), 1, 1, "(2,0): (1,0) x (1,0)");
     TEST_EQ_SQRAT((*isf)(0, 2, 1, 1, 0, 1, 1), 1, 1, "(2,1): (1,0) x (1,1)");
+
+    delete isf;
 }
 
 void print_isoscalars(long p, long q, long p1, long q1, long p2, long q2)
@@ -69,6 +73,7 @@ TEST(isoscalars)
 {
 #if 0
     long p1, q1, p2, q2, p, q;
+    isoarray* isf;
     /* Check that our recurrence relations work (ie, don't crash)
         for a range of different sets of reps */
     for (p1 = 0; p1 < 5; ++p1)
@@ -77,7 +82,10 @@ TEST(isoscalars)
                 for (q2 = 0; q2 < 5; ++q2)
                     for (p = 0; p < 5; ++p)
                         for (q = 0; q < 5; ++q)
-                            isoscalars(p1,q1,p2,q2,p,q);
+                        {
+                            isf = isoscalars(p1,q1,p2,q2,p,q);
+                            delete isf;
+                        }
     fprintf(stderr, "Isoscalar calculations okay\n");
 #else
     print_isoscalars(2,2,1,1,1,1);

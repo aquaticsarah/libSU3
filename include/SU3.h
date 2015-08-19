@@ -92,20 +92,23 @@ class isoarray
 {
 public:
     /* Target and factor reps */
-    long p, q, p1, q1, p2, q2;
+    const long p, q, p1, q1, p2, q2;
 
     /* Degeneracy of target rep */
-    long d;
+    const long d;
 
-    sqrat* coefficients;
+    const sqrat* coefficients;
 
-    isoarray(long p, long q, long p1, long q1, long p2, long q2);
+    /* Note: This type takes ownership of the array passed in - that is, it will
+        delete the array when the isoarray object is deleted. */
+    isoarray(long p, long q, long p1, long q1, long p2, long q2, long d,
+                sqrat* coefficients);
     ~isoarray();
 
     /* We use operator() instead of operator[] as an easy way to use
     multiple indices */
-    sqrat& operator()(long n, long k, long l, long k1, long l1,
-                        long k2, long l2);
+    sqrat operator()(long n, long k, long l, long k1, long l1,
+                    long k2, long l2);
 };
 
 /* Information about representations */

@@ -6,29 +6,38 @@
 #include "SU3.h"
 
 /* Various useful functions */
-long min(long a, long b);
-long min(long a, long b, long c);
-long min(long a, long b, long c, long d);
-long max(long a, long b);
-long max(long a, long b, long c, long d, long e, long f);
+long min(long, long);
+long min(long, long, long);
+long min(long, long, long, long);
+long max(long, long);
+long max(long, long, long);
+long max(long, long, long, long, long, long);
 long gcd(long, long);
+
+/* Macro to calculate (-1)^v */
+#define SIGN(v) ((((v) % 2) == 0) ? 1 : -1)
 
 /* A class for storing a bunch of useful values during our calculations.
     All functions are run as methods of an object of this class, so we have
     easy access to those values */
 class isoscalar_context
 {
+public:
+    /* Functions to get/set particular isoscalar factors. */
+    sqrat isf(long n, long k, long l, long k1, long l1, long k2, long l2);
+    void set_isf(long n, long k, long l, long k1, long l1, long k2, long l2,
+                    sqrat value);
+
 private:
     /* Values which many functions need access to */
     long p, q, p1, q1, p2, q2; // Target and factor reps
     long d; // Degeneracy
     long A; // = 1/3 (2(p1+p2) + 4(q1+q2) + (p-q))
 
-    isoarray* isf;
+    sqrat* coefficients;
 
-    /* Constructor */
-    isoscalar_context(isoarray* isf, long p, long q, long p1,
-                    long q1, long p2, long q2);
+    isoscalar_context(long p, long q, long p1, long q1, long p2, long q2,
+                        long d, sqrat* coefficients);
 
     /* Calculate the coefficients for each of the four recursion relations.
        Each stores the coefficients in its last four arguments.
@@ -50,7 +59,7 @@ private:
                         sqrat& b1, sqrat& b2, sqrat& b3, sqrat& b4);
     void c_coefficients(long k, long l, long k1, long l1, long k2, long l2,
                 sqrat& alpha, sqrat& c1, sqrat& c2, sqrat& c3, sqrat& c4);
-    void d_coefficients(long k, long l, long k1, long l1, long k2, long l2,
+    void d_coefficients(long k, long k1, long l1, long k2, long l2,
                 sqrat& beta, sqrat& d1, sqrat& d2, sqrat& d3);
 
     /* Use the A and B recursion relations to step along the

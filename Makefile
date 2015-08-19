@@ -1,3 +1,5 @@
+# libSU3: Instructions for building various files
+
 # Where to place intermediate files
 BUILDDIR := /tmp/libSU3
 
@@ -30,7 +32,7 @@ DIRS := $(sort $(dir $(FILES)))
 
 # Toolchain
 CC := g++ -c
-CFLAGS := -Wall -Wextra -Werror
+CFLAGS := -Wall -Wextra -Werror -ggdb
 
 # Include lists for library code and for the tests
 # (each of which has internal headers which shouldn't be used
@@ -40,7 +42,7 @@ LIB_INCLUDE := $(INCLUDE) -I src/
 TEST_INCLUDE := $(INCLUDE) -I tests/
 
 LD := g++
-LDFLAGS :=
+LDFLAGS := -ggdb
 
 MKDEP := g++ -MM -MP
 

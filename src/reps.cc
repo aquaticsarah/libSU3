@@ -1,4 +1,4 @@
-/* libSU3: Miscellaneous information about irreps of SU(3) */
+/* libSU3: Tests for information about irreps of SU(3) */
 
 #include <stdio.h>
 

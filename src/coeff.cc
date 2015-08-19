@@ -129,8 +129,7 @@ void isoscalar_context::c_coefficients(long k, long l, long k1, long l1,
     c4 = sqrat(numerator, denominator);
 }
 
-/* TODO: Remove l, since we always have l=0 when calling this? */
-void isoscalar_context::d_coefficients(long k, long l, long k1, long l1,
+void isoscalar_context::d_coefficients(long k, long k1, long l1,
                 long k2, long l2, sqrat& beta, sqrat& d1, sqrat& d2, sqrat& d3)
 {
     long numerator, denominator;
@@ -142,11 +141,11 @@ void isoscalar_context::d_coefficients(long k, long l, long k1, long l1,
     beta = sqrat(numerator, denominator);
 
     numerator = 4*(k1+2)*(k1-q1+1)*(p1+q1-k1)*(k1-l1+1);
-    denominator = (k1-l1+2)*(k-l+s+4)*(k-l+t+2);
+    denominator = (k1-l1+2)*(k+s+4)*(k+t+2);
     d1 = sqrat(numerator, denominator);
 
-    numerator = (k2+2)*(k2-q2+1)*(p2+q2-k2)*(k-l-t+2);
-    denominator = (k2-l2+1)*(k2-l2+2)*(k-l+s+4);
+    numerator = (k2+2)*(k2-q2+1)*(p2+q2-k2)*(k-t+2);
+    denominator = (k2-l2+1)*(k2-l2+2)*(k+s+4);
     d2 = sqrat(numerator, denominator);
 
     /* If k2==l2, d3 is infinite or indeterminate. But in that case,
@@ -157,8 +156,8 @@ void isoscalar_context::d_coefficients(long k, long l, long k1, long l1,
         d3 = sqrat(0);
     else
     {
-        numerator = (l2+1)*(q2-l2)*(p2+q2-l2+1)*(s-k+l);
-        denominator = (k2-l2)*(k2-l2+1)*(k-l+t+2);
+        numerator = (l2+1)*(q2-l2)*(p2+q2-l2+1)*(s-k);
+        denominator = (k2-l2)*(k2-l2+1)*(k+t+2);
         d3 = sqrat(numerator, denominator);
     }
 }

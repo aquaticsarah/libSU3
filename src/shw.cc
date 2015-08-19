@@ -21,10 +21,10 @@ void isoscalar_context::step_k1_up(long n, long s, long k1, long l1)
     a_coefficients(k1, l1, k2+1, l2, a1, a2, a3, a4);
 
     /* Calculate the value at (k1,l1,k2,l2) using surrounding values */
-    sqrat res = (-a1 * (*isf)(n, p+q, 0, k1-1, l1, k2+1, l2)
-                 -a3 * (*isf)(n, p+q, 0, k1, l1-1, k2+1, l2)
-                 -a4 * (*isf)(n, p+q, 0, k1, l1, k2+1, l2-1)) / a2;
-    (*isf)(n, p+q, 0, k1, l1, k2, l2) = res;
+    sqrat res = (-a1 * isf(n, p+q, 0, k1-1, l1, k2+1, l2)
+                 -a3 * isf(n, p+q, 0, k1, l1-1, k2+1, l2)
+                 -a4 * isf(n, p+q, 0, k1, l1, k2+1, l2-1)) / a2;
+    set_isf(n, p+q, 0, k1, l1, k2, l2, res);
 }
 
 void isoscalar_context::step_k1_down(long n, long s, long k1, long l1)
@@ -36,10 +36,10 @@ void isoscalar_context::step_k1_down(long n, long s, long k1, long l1)
     a_coefficients(k1+1, l1, k2, l2, a1, a2, a3, a4);
 
     /* Calculate the value at (k1,l1,k2,l2) using surrounding values */
-    sqrat res = (-a2 * (*isf)(n, p+q, 0, k1+1, l1, k2-1, l2)
-                 -a3 * (*isf)(n, p+q, 0, k1+1, l1-1, k2, l2)
-                 -a4 * (*isf)(n, p+q, 0, k1+1, l1, k2, l2-1)) / a1;
-    (*isf)(n, p+q, 0, k1, l1, k2, l2) = res;
+    sqrat res = (-a2 * isf(n, p+q, 0, k1+1, l1, k2-1, l2)
+                 -a3 * isf(n, p+q, 0, k1+1, l1-1, k2, l2)
+                 -a4 * isf(n, p+q, 0, k1+1, l1, k2, l2-1)) / a1;
+    set_isf(n, p+q, 0, k1, l1, k2, l2, res);
 }
 
 void isoscalar_context::step_l1_up(long n, long s, long k1, long l1)
@@ -51,10 +51,10 @@ void isoscalar_context::step_l1_up(long n, long s, long k1, long l1)
     b_coefficients(k1, l1-1, k2, l2, b1, b2, b3, b4);
 
     /* Calculate the value at (k1,l1,k2,l2) using surrounding values */
-    sqrat res = (-b1 * (*isf)(n, p+q, 0, k1+1, l1-1, k2, l2)
-                 -b2 * (*isf)(n, p+q, 0, k1, l1-1, k2+1, l2)
-                 -b4 * (*isf)(n, p+q, 0, k1, l1-1, k2, l2+1)) / b3;
-    (*isf)(n, p+q, 0, k1, l1, k2, l2) = res;
+    sqrat res = (-b1 * isf(n, p+q, 0, k1+1, l1-1, k2, l2)
+                 -b2 * isf(n, p+q, 0, k1, l1-1, k2+1, l2)
+                 -b4 * isf(n, p+q, 0, k1, l1-1, k2, l2+1)) / b3;
+    set_isf(n, p+q, 0, k1, l1, k2, l2, res);
 }
 
 void isoscalar_context::step_l1_down(long n, long s, long k1, long l1)
@@ -66,10 +66,10 @@ void isoscalar_context::step_l1_down(long n, long s, long k1, long l1)
     b_coefficients(k1, l1, k2, l2-1, b1, b2, b3, b4);
 
     /* Calculate the value at (k1,l1,k2,l2) using surrounding values */
-    sqrat res = (-b1 * (*isf)(n, p+q, 0, k1+1, l1, k2, l2-1)
-                 -b2 * (*isf)(n, p+q, 0, k1, l1, k2+1, l2-1)
-                 -b3 * (*isf)(n, p+q, 0, k1, l1+1, k2, l2-1)) / b4;
-    (*isf)(n, p+q, 0, k1, l1, k2, l2) = res;
+    sqrat res = (-b1 * isf(n, p+q, 0, k1+1, l1, k2, l2-1)
+                 -b2 * isf(n, p+q, 0, k1, l1, k2+1, l2-1)
+                 -b3 * isf(n, p+q, 0, k1, l1+1, k2, l2-1)) / b4;
+    set_isf(n, p+q, 0, k1, l1, k2, l2, res);
 }
 
 /* Step down from one plane (at s+2) to the next plane (at s).
@@ -174,8 +174,8 @@ sqrat isoscalar_context::inner_product(long m, long n)
                 l2 = A - (k1+l1+k2);
                 if ((l2 < 0) || (l2 > q2)) continue;
 
-                result += (*isf)(m, p+q, 0, k1, l1, k2, l2)
-                        * (*isf)(n, p+q, 0, k1, l1, k2, l2);
+                result += isf(m, p+q, 0, k1, l1, k2, l2)
+                        * isf(n, p+q, 0, k1, l1, k2, l2);
             }
 
     return result;
@@ -204,7 +204,7 @@ int isoscalar_context::calc_shw()
 
         /* Set one ISF in one particular irrep (leaving the same ISF
            in the other irreps as zero) */
-        (*isf)(m, p+q, 0, k1min, l1min, (A+s)/2 - k1min, (A-s)/2 - l1min) = 1;
+        set_isf(m, p+q, 0, k1min, l1min, (A+s)/2 - k1min, (A-s)/2 - l1min, 1);
 
         for (n = 0; n < d; ++n)
         {
@@ -267,7 +267,9 @@ int isoscalar_context::calc_shw()
                         l2 = A - (k1+l1+k2);
                         if ((l2 < 0) || (l2 > q2)) continue;
 
-                        (*isf)(n, p+q, 0, k1, l1, k2, l2) -= v * (*isf)(m, p+q, 0, k1, l1, k2, l2);
+                        set_isf(n, p+q, 0, k1, l1, k2, l2,
+                            isf(n, p+q, 0, k1, l1, k2, l2)
+                            - v * isf(m, p+q, 0, k1, l1, k2, l2));
                     }
         }
 
@@ -285,14 +287,14 @@ int isoscalar_context::calc_shw()
         v = sqrt(inner_product(n, n));
 
         /* Step through until we find a state which couples */
-        while ((*isf)(n, p+q, 0, p1+q1, 0, k2max, l2min) == 0)
+        while (isf(n, p+q, 0, p1+q1, 0, k2max, l2min) == 0)
         {
             k2max -= 1;
             l2min += 1;
         }
         /* If this state has negative coupling, we need to negate the rep,
             in order to match the sign convention */
-        if ((*isf)(n, p+q, 0, p1+q1, 0, k2max, l2min) < 0)
+        if (isf(n, p+q, 0, p1+q1, 0, k2max, l2min) < 0)
             v = -v;
 
         for (k1 = q1; k1 <= p1+q1; ++k1)
@@ -304,7 +306,8 @@ int isoscalar_context::calc_shw()
                     l2 = A - (k1+l1+k2);
                     if ((l2 < 0) || (l2 > q2)) continue;
 
-                    (*isf)(n, p+q, 0, k1, l1, k2, l2) /= v;
+                    set_isf(n, p+q, 0, k1, l1, k2, l2,
+                        isf(n, p+q, 0, k1, l1, k2, l2) / v);
                 }
     }
 

@@ -23,9 +23,14 @@ long max(long a, long b)
     return (a > b) ? a : b;
 }
 
+long max(long a, long b, long c)
+{
+    return max(max(a, b), c);
+}
+
 long max(long a, long b, long c, long d, long e, long f)
 {
-    return max(max(max(a, b), max(c, d)), max(e, f));
+    return max(max(a, b, c), max(d, e, f));
 }
 
 /* Calculate the GCD of two integers */
