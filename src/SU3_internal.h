@@ -89,7 +89,7 @@ private:
     int calc_shw();
 
     /* Fill out each multiplet, assuming that the SHWs have been calculated */
-    void calc_isoscalars();
+    int calc_isoscalars();
 
     /* Allow the top-level driver function to interact with
         objects of this class */

@@ -80,7 +80,9 @@ TEST(isoscalars)
                             isoscalars(p1,q1,p2,q2,p,q);
     fprintf(stderr, "Isoscalar calculations okay\n");
 #else
-    print_isoscalars(1,1,1,1,1,1);
+    print_isoscalars(2,2,1,1,1,1);
+    print_isoscalars(1,1,2,2,1,1);
+    print_isoscalars(1,1,1,1,2,2);
 
     fprintf(stderr, "Isoscalar calculations okay\n");
 #endif

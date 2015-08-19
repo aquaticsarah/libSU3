@@ -2,6 +2,8 @@
    Note: This also does degeneracy resolution */
 
 #include <stdio.h>
+#include <assert.h>
+#include <stdexcept>
 
 #include "SU3_internal.h"
 
@@ -47,10 +49,18 @@ void isoscalar_context::step_l_up(long n, long k, long l, long k1,
                                       ) * alpha;
 }
 
-/* Fill out a multiplet, assuming that the SHW has been calculated */
-void isoscalar_context::calc_isoscalars()
+/* Internal function: Calculate the isoscalar factors for a particular
+    combination of reps. */
+int isoscalar_context::calc_isoscalars()
 {
+    /* Calculate couplings to the state of highest weight (k=p+q, l=0).
+        This may fail, in which case we return to the top-level function
+        which will try using symmetries to convert into a solvable problem.
+    */
+    if (! this->calc_shw())
+        return 0;
 
+    /* Then fill in the rest of the couplings */
     long n, k, l, k1, l1, k2, l2;
     for (n = 0; n < d; ++n)
     {
@@ -93,6 +103,8 @@ void isoscalar_context::calc_isoscalars()
                         }
         }
     }
+
+    return 1;
 }
 
 /* Main calculation function */
@@ -104,12 +116,92 @@ isoarray* isoscalars(long p, long q, long p1, long q1, long p2, long q2)
     isoarray* isf = new isoarray(p,q,p1,q1,p2,q2);
     isoscalar_context* ctx = new isoscalar_context(isf,p,q,p1,q1,p2,q2);
 
-    ctx->calc_shw();
-    /* TODO: Deal with the case where we need to use the conjugated reps */
+    if (ctx->calc_isoscalars())
+    {
+        delete ctx;
+        return isf;
+    }
 
-    /* Now step around the rest of the multiplet, filling out states */
-    ctx->calc_isoscalars();
-
+    /* If the direct algorithm fails, we try using the 1 <-> 3bar symmetry.
+        This relates the isoscalar factors for r1 x r2 -> R to those for
+        Rbar x r2 -> r1bar.
+    */
     delete ctx;
-    return isf;
+
+#define SIGN(v) ((((v) % 2) == 0) ? 1 : -1)
+
+    /* TODO: Check that degeneracy is the same under symmetry relations */
+    assert(d == degeneracy(q1, p1, q, p, p2, q2));
+    isoarray* new_isf = new isoarray(q1, p1, q, p, p2, q2);
+    ctx = new isoscalar_context(new_isf, q1, p1, q, p, p2, q2);
+
+    if (ctx->calc_isoscalars())
+    {
+        /* Use the symmetry relations to fill out the isoscalar factors for
+           the reps we wanted originally */
+        long n, k, l, k1, l1, k2, l2;
+        for (n = 0; n < d; ++n)
+            for (k = q; k <= p+q; ++k)
+                for (l = 0; l <= q; ++l)
+                    for (k1 = q1; k1 <= p1+q1; ++k1)
+                        for (l1 = 0; l1 <= q1; ++l1)
+                            for (k2 = q2; k2 <= p2+q2; ++k2)
+                            {
+                                l2 = (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3 - (k1 + l1 + k2 - k - l);
+                                if ((l2 < 0) || (l2 > q2)) continue;
+
+                                (*isf)(n, k, l, k1, l1, k2, l2) =
+                                    SIGN(l2)
+                                  * sqrat((p+1)*(q+1)*(p+q+2)*(k1-l1+1), (p1+1)*(q1+1)*(p1+q1+2)*(k-l+1))
+                                  * (*new_isf)(n, p1+q1-l1, p1+q1-k1, p+q-l, p+q-k, k2, l2);
+                            }
+
+        delete new_isf;
+        return isf;
+    }
+
+    /* If that fails, combine with the r1 <-> r2 exchange symmetry.
+        This results in a relation between the ISFs for r1 x r2 -> R
+        and those for Rbar x r1 -> r2bar */
+    delete ctx;
+
+    assert(d == degeneracy(q2, p2, q, p, p1, q1));
+    new_isf = new isoarray(q2, p2, q, p, p1, q1);
+    ctx = new isoscalar_context(new_isf, q2, p2, q, p, p1, q1);
+
+    if (ctx->calc_isoscalars())
+    {
+        /* For this case, we need to calculate an overall phase factor */
+        long x = p1 + p2 - p;
+        long y = q1 + q2 - q;
+        long xi_1 = SIGN(x + y + max(x, y));
+
+        /* Use the symmetry relations to fill out the isoscalar factors for
+           the reps we wanted originally */
+        long n, k, l, k1, l1, k2, l2;
+        for (n = 0; n < d; ++n)
+            for (k = q; k <= p+q; ++k)
+                for (l = 0; l <= q; ++l)
+                    for (k1 = q1; k1 <= p1+q1; ++k1)
+                        for (l1 = 0; l1 <= q1; ++l1)
+                            for (k2 = q2; k2 <= p2+q2; ++k2)
+                            {
+                                l2 = (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3 - (k1 + l1 + k2 - k - l);
+                                if ((l2 < 0) || (l2 > q2)) continue;
+
+                                (*isf)(n, k, l, k1, l1, k2, l2) =
+                                    xi_1
+                                  * SIGN((k1 - l1 + k2 - l2 - k + l)/2)
+                                  * SIGN(l1)
+                                  * sqrat((p+1)*(q+1)*(p+q+2)*(k2-l2+1), (p2+1)*(q2+1)*(p2+q2+2)*(k-l+1))
+                                  * (*new_isf)(n, p2+q2-l2, p2+q2-k2, p+q-l, p+q-k, k1, l1);
+                            }
+
+        delete new_isf;
+        return isf;
+    }
+
+    /* If we get here, nothing has worked, so throw an error */
+    delete isf;
+    throw std::logic_error("Calculation of ISFs failed");
 }
