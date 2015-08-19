@@ -271,8 +271,29 @@ int isoscalar_context::calc_shw()
                     }
         }
 
-        /* Normalisation */
+        /* Normalisation.
+            Note that, at the same time, we enforce the sign convention that
+            F(p+q, 0; p1+q1, 0, k2max, l2min) > 0.
+            Here k2max means "The highest k2 which couples the state
+            (p1+q1, 0) in rep 1 to (p+q, 0) in the target rep".
+            This works out to be determined by the following:
+        */
+        long B = (-p1 + 2*p2 + q1 + 4*q2 + p - q)/3;
+        long k2max = min(p2+q2, B);
+        long l2min = max(0, B - p2 - q2);
+
         v = sqrt(inner_product(n, n));
+
+        /* Step through until we find a state which couples */
+        while ((*isf)(n, p+q, 0, p1+q1, 0, k2max, l2min) == 0)
+        {
+            k2max -= 1;
+            l2min += 1;
+        }
+        /* If this state has negative coupling, we need to negate the rep,
+            in order to match the sign convention */
+        if ((*isf)(n, p+q, 0, p1+q1, 0, k2max, l2min) < 0)
+            v = -v;
 
         for (k1 = q1; k1 <= p1+q1; ++k1)
             for (l1 = 0; l1 <= q1; ++l1)
