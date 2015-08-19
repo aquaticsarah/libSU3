@@ -291,6 +291,109 @@ sqrat sqrt(sqrat v)
     return sqrat(isqrt(v.p), isqrt(v.q));
 }
 
+/* Comparisons */
+bool sqrat::operator<(sqrat other)
+{
+    return p*other.q < q*other.p;
+}
+
+bool sqrat::operator<(long other)
+{
+    return *this < sqrat(other);
+}
+
+bool operator<(long left, sqrat right)
+{
+    return sqrat(left) < right;
+}
+
+
+
+bool sqrat::operator<=(sqrat other)
+{
+    return p*other.q <= q*other.p;
+}
+
+bool sqrat::operator<=(long other)
+{
+    return *this <= sqrat(other);
+}
+
+bool operator<=(long left, sqrat right)
+{
+    return sqrat(left) <= right;
+}
+
+
+
+bool sqrat::operator==(sqrat other)
+{
+    return (p == other.p) && (q == other.q);
+}
+
+bool sqrat::operator==(long other)
+{
+    return *this == sqrat(other);
+}
+
+bool operator==(long left, sqrat right)
+{
+    return sqrat(left) == right;
+}
+
+
+
+bool sqrat::operator!=(sqrat other)
+{
+    return (p != other.p) || (q != other.q);
+}
+
+bool sqrat::operator!=(long other)
+{
+    return *this != sqrat(other);
+}
+
+bool operator!=(long left, sqrat right)
+{
+    return sqrat(left) != right;
+}
+
+
+
+bool sqrat::operator>(sqrat other)
+{
+    return p*other.q > q*other.p;
+}
+
+bool sqrat::operator>(long other)
+{
+    return *this > sqrat(other);
+}
+
+bool operator>(long left, sqrat right)
+{
+    return sqrat(left) > right;
+}
+
+
+
+bool sqrat::operator>=(sqrat other)
+{
+    return p*other.q >= q*other.p;
+}
+
+bool sqrat::operator>=(long other)
+{
+    return *this >= sqrat(other);
+}
+
+bool operator>=(long left, sqrat right)
+{
+    return sqrat(left) >= right;
+}
+
+
+
 /* Conversions to various types */
 char* sqrat::tostring(char* buffer, size_t len)
 {

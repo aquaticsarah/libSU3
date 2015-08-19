@@ -49,6 +49,25 @@ public:
 
     friend sqrat sqrt(sqrat);
 
+    /* Comparisons */
+    bool operator<(sqrat);
+    bool operator<(long);
+
+    bool operator<=(sqrat);
+    bool operator<=(long);
+
+    bool operator==(sqrat);
+    bool operator==(long);
+
+    bool operator!=(sqrat);
+    bool operator!=(long);
+
+    bool operator>(sqrat);
+    bool operator>(long);
+
+    bool operator>=(sqrat);
+    bool operator>=(long);
+
     /* Conversions to various types */
     char* tostring(char*, size_t);
     double todouble();
@@ -59,6 +78,14 @@ sqrat operator*(long, sqrat);
 sqrat operator/(long, sqrat);
 sqrat operator+(long, sqrat);
 sqrat operator-(long, sqrat);
+
+/* Reversed comparisons */
+bool operator<(long, sqrat);
+bool operator<=(long, sqrat);
+bool operator==(long, sqrat);
+bool operator!=(long, sqrat);
+bool operator>(long, sqrat);
+bool operator>=(long, sqrat);
 
 /* A class to hold the isoscalar factors for a particular coupling */
 class isoarray
