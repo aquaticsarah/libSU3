@@ -31,7 +31,9 @@ int main()
                             isoscalars(p1,q1,p2,q2,p,q);
     fprintf(stderr, "Isoscalar calculations okay\n");
 #else
-    isoscalars(1,1,1,1,1,1);
+    /* Decompose 3 x 3bar -> 1 + 8 and print coefficients */
+    isoscalars(0,0,1,0,0,1);
+    isoscalars(1,1,1,0,0,1);
     fprintf(stderr, "Isoscalar calculations okay\n");
 #endif
 

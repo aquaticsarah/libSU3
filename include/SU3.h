@@ -5,6 +5,14 @@
 
 #include <stddef.h>
 
+/* Various useful functions */
+long min(long a, long b);
+long min(long a, long b, long c);
+long min(long a, long b, long c, long d);
+long max(long a, long b);
+long max(long a, long b, long c, long d, long e, long f);
+long gcd(long, long);
+
 /* Class to represent (+ or -) the square root of a rational.
     The actual value represented is (sign(p) * sqrt(|p| / q))
 */
@@ -63,13 +71,6 @@ public:
     sqrat& operator()(long n, long k, long l, long k1, long l1,
                         long k2, long l2);
 };
-
-/* Min and max for various numbers of arguments */
-long min(long a, long b);
-long min(long a, long b, long c);
-long min(long a, long b, long c, long d);
-long max(long a, long b);
-long max(long a, long b, long c, long d, long e, long f);
 
 /* Information about representations */
 long dimension(long p, long q);

@@ -27,27 +27,19 @@ static long isqrt(long x)
     }
 }
 
-/* Calculate a GCD, giving the result the same sign as q.
-    This is so that, when we reduce a fraction, the numerator can have any
-    sign, but the denominator is always >= 0 */
-static long gcd(long p, long q)
-{
-    if (p == 0) return q;
-    if (q == 0) return p;
-
-    if (p < 0) p = -p;
-
-    /* Make sure to give the result the sign of q */
-    if (q < 0) return -gcd(-q, p%(-q));
-    else return gcd(q, p%q);
-}
-
 /* Reduce a fraction to its lowest terms */
 void sqrat::reduce()
 {
     long d = gcd(p, q);
     p /= d;
     q /= d;
+
+    /* Make sure that q is nonnegative */
+    if (q < 0)
+    {
+        p = -p;
+        q = -q;
+    }
 }
 
 /* Various constructors */
@@ -67,7 +59,7 @@ sqrat::sqrat(long i) : p(sign_square(i)), q(1) {}
 
 sqrat::sqrat() : p(0), q(1) {}
 
-/* Temporary functions to get components */
+/* Temporary functions to get components; TODO: Remove */
 long sqrat::numerator()
 {
     return p;

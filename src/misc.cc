@@ -25,3 +25,12 @@ long max(long a, long b, long c, long d, long e, long f)
 {
     return max(max(max(a, b), max(c, d)), max(e, f));
 }
+
+/* Calculate the GCD of two integers */
+long gcd(long p, long q)
+{
+    if (p == 0) return q;
+    if (q == 0) return p;
+
+    return gcd(q, p%q);
+}
