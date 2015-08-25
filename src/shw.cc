@@ -235,11 +235,6 @@ int isoscalar_context::calc_shw()
         l1min = max(0, (A - s)/2 - q2);
         l1max = min(q1, (A - s)/2);
 
-        fprintf(stderr,
-            "(%ld,%ld)x(%ld,%ld) -> (%ld,%ld):\n"
-            "Stepping down to s=%ld; k1min=%ld, k1max=%ld, l1min=%ld, l1max=%ld\n\n",
-            p1, q1, p2, q2, p, q, s, k1min, k1max, l1min, l1max);
-
         for (n = 0; n < d; ++n)
         {
             /* Try to step down, exiting if it fails */
@@ -252,12 +247,12 @@ int isoscalar_context::calc_shw()
         }
     }
 
-    /* Orthonormalise the ISFs for different representations. */
+    /* Orthonormalise the ISFs for different representations.
+       We orthogonalise each rep against *later* reps in order to get equivalent
+       results to the algorithm described in our references. */
     for (n = 0; n < d; ++n)
     {
         sqrat v;
-        /* Note: We orthogonalise against higher reps in order to agree with
-           existing results. TODO: Check if this always works. */
         for (m = n+1; m < d; ++m)
         {
             /* Factor to multiply rep 'm' by when subtracting from rep 'n' */

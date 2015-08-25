@@ -81,3 +81,84 @@ void isoscalar_context::b_coefficients(long k1, long l1, long k2, long l2,
         b4 = sqrat(numerator, denominator);
     }
 }
+
+void isoscalar_context::c_coefficients(long k, long l, long k1, long l1,
+                    long k2, long l2, sqrat& alpha, sqrat& c1, sqrat& c2,
+                    sqrat& c3, sqrat& c4)
+{
+    long numerator, denominator;
+    long s = k1 - l1 + k2 - l2; /* = 2(I_1 + I_2) */
+    long t = k1 - l1 - k2 + l2; /* = 2(I_1 - I_2) */
+
+    numerator = (k-l+2)*(k-l+2);
+    denominator = l*(q-l+1)*(p+q-l+2);
+    alpha = sqrat(numerator, denominator);
+
+    if (k-l+t+2 == 0)
+    {
+        c1 = sqrat(0);
+        c2 = sqrat(0);
+        c3 = sqrat(0);
+    }
+    else
+    {
+        numerator = (k+2)*(k-q+1)*(p+q-k)*(s-k+l)*(k-l-t+2);
+        denominator = (k-l+2)*(k-l+2)*(k-l+s+4)*(k-l+t+2);
+        c1 = sqrat(numerator, denominator);
+
+        numerator = 4*l1*(q1-l1+1)*(p1+q1-l1+2)*(k1-l1+1);
+        denominator = (k1-l1+2)*(k-l+s+4)*(k-l+t+2);
+        c2 = sqrat(numerator, denominator);
+
+        /* If k2==l2, c3 is infinite or indeterminate. But in that case,
+            it is the coefficient of a state with l2>k2, which is impossible
+            (ie, there must be zero coupling). Thus we can just replace it by 0.
+        */
+        if (k2 == l2)
+            c3 = sqrat(0);
+        else
+        {
+            numerator = -(k2+1)*(k2-q2)*(s-k+l)*(p2+q2-k2+1);
+            denominator = (k2-l2)*(k2-l2+1)*(k-l+t+2);
+            c3 = sqrat(numerator, denominator);
+        }
+    }
+
+    numerator = l2*(q2-l2+1)*(p2+q2-l2+2)*(k-l-t+2);
+    denominator = (k2-l2+1)*(k2-l2+2)*(k-l+s+4);
+    c4 = sqrat(numerator, denominator);
+}
+
+/* TODO: Remove l, since we always have l=0 when calling this? */
+void isoscalar_context::d_coefficients(long k, long l, long k1, long l1,
+                long k2, long l2, sqrat& beta, sqrat& d1, sqrat& d2, sqrat& d3)
+{
+    long numerator, denominator;
+    long s = k1 - l1 + k2 - l2; /* = 2(I_1 + I_2) */
+    long t = k1 - l1 - k2 + l2; /* = 2(I_1 - I_2) */
+
+    numerator = k+2;
+    denominator = (k-q+1)*(p+q-k);
+    beta = sqrat(numerator, denominator);
+
+    numerator = 4*(k1+2)*(k1-q1+1)*(p1+q1-k1)*(k1-l1+1);
+    denominator = (k1-l1+2)*(k-l+s+4)*(k-l+t+2);
+    d1 = sqrat(numerator, denominator);
+
+    numerator = (k2+2)*(k2-q2+1)*(p2+q2-k2)*(k-l-t+2);
+    denominator = (k2-l2+1)*(k2-l2+2)*(k-l+s+4);
+    d2 = sqrat(numerator, denominator);
+
+    /* If k2==l2, d3 is infinite or indeterminate. But in that case,
+        it is the coefficient of a state with l2>k2, which is impossible
+        (ie, there must be zero coupling). Thus we can just replace it by 0.
+    */
+    if (k2 == l2)
+        d3 = sqrat(0);
+    else
+    {
+        numerator = (l2+1)*(q2-l2)*(p2+q2-l2+1)*(s-k+l);
+        denominator = (k2-l2)*(k2-l2+1)*(k-l+t+2);
+        d3 = sqrat(numerator, denominator);
+    }
+}

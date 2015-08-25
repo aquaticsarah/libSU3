@@ -30,21 +30,20 @@ void print_isoscalars(long p, long q, long p1, long q1, long p2, long q2)
     {
         printf("Degenerate rep %ld:\n", n);
 
-        /* For now, only look at the state of highest weight */
-        k = p+q; l = 0;
+        for (k = q; k <= p+q; ++k)
+            for (l = 0; l <= q; ++l)
+                for (k1 = q1; k1 <= p1+q1; ++k1)
+                    for (l1 = 0; l1 <= q1; ++l1)
+                        for (k2 = q2; k2 <= p2+q2; ++k2)
+                        {
+                            l2 = (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3 - (k1 + l1 + k2 - k - l);
+                            if ((l2 < 0) || (l2 > q2)) continue;
 
-        for (k1 = q1; k1 <= p1+q1; ++k1)
-            for (l1 = 0; l1 <= q1; ++l1)
-                for (k2 = q2; k2 <= p2+q2; ++k2)
-                {
-                    l2 = (2*p1 + 2*p2 + 4*q1 + 4*q2 + p - q)/3 - (k1 + l1 + k2);
-                    if ((l2 < 0) || (l2 > q2)) continue;
-
-                    sqrat val = (*isf)(n, k, l, k1, l1, k2, l2);
-                    val.tostring(buf, 64);
-                    printf("    (%ld,%ld) : (%ld,%ld) x (%ld,%ld) = %s\n",
-                        k, l, k1, l1, k2, l2, buf);
-                }
+                            sqrat val = (*isf)(n, k, l, k1, l1, k2, l2);
+                            val.tostring(buf, 64);
+                            printf("    (%ld,%ld) : (%ld,%ld) x (%ld,%ld) = %s\n",
+                                k, l, k1, l1, k2, l2, buf);
+                        }
         printf("\n");
     }
 

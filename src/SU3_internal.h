@@ -26,6 +26,10 @@ private:
 
     isoarray* isf;
 
+    /* Constructor */
+    isoscalar_context(isoarray* isf, long p, long q, long p1,
+                    long q1, long p2, long q2);
+
     /* Calculate the coefficients for each of the four recursion relations.
        Each stores the coefficients in its last four arguments.
        The expressions are based on arXiv:nucl-th/9511025.
@@ -44,9 +48,13 @@ private:
                         sqrat& a1, sqrat& a2, sqrat& a3, sqrat& a4);
     void b_coefficients(long k1, long l1, long k2, long l2,
                         sqrat& b1, sqrat& b2, sqrat& b3, sqrat& b4);
+    void c_coefficients(long k, long l, long k1, long l1, long k2, long l2,
+                sqrat& alpha, sqrat& c1, sqrat& c2, sqrat& c3, sqrat& c4);
+    void d_coefficients(long k, long l, long k1, long l1, long k2, long l2,
+                sqrat& beta, sqrat& d1, sqrat& d2, sqrat& d3);
 
     /* Use the A and B recursion relations to step along the
-       k1 and l1 axes within a plane.
+       k1 and l1 axes within a plane of constant s.
 
        The arguments identify the state to be calclated, *not* the values
        of k1,l1,k2,l2 used in the recursion relation itself.
@@ -55,6 +63,15 @@ private:
     void step_k1_down(long n, long s, long k1, long l1);
     void step_l1_up(long n, long s, long k1, long l1);
     void step_l1_down(long n, long s, long k1, long l1);
+
+    /* Use the C and D recursion relations to step along the
+       k and l axes within a multiplet.
+       We fix l=0 in step_k_down, since this can *only* step down to such states.
+
+       The arguments identify the state to be calclated, *not* the values
+       of k1,l1,k2,l2 used in the recursion relation itself. */
+    void step_k_down(long n, long k, long k1, long l1, long k2, long l2);
+    void step_l_up(long n, long k, long l, long k1, long l1, long k2, long l2);
 
     /* Step down from one plane (at s+2) to the next plane (at s).
        Sometimes this can fail, in which case you need to conjugate all reps,
@@ -68,10 +85,11 @@ private:
     /* Calculate the inner product of two sets of isoscalar factors */
     sqrat inner_product(long m, long n);
 
-protected:
-    isoscalar_context(isoarray* isf, long p, long q, long p1,
-                    long q1, long p2, long q2);
+    /* Calculate couplings to the state of highest weight in each multiplet */
     int calc_shw();
+
+    /* Fill out each multiplet, assuming that the SHWs have been calculated */
+    void calc_isoscalars();
 
     /* Allow the top-level driver function to interact with
         objects of this class */
