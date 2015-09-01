@@ -30,15 +30,16 @@ extern int tests_passed;
 /* Helper for tests involving the sqrat type
    (tests if a == sqrat(p,q)). "thing" is what the calculation
    is supposed to represent */
-#define TEST_EQ_SQRAT(a, p, q, thing) \
+#define TEST_EQ_SQRAT(a, p, q, thing, args...) \
     do \
     { \
-        char abuf[64], pqbuf[64]; \
+        char abuf[64], pqbuf[64], thingbuf[64]; \
         a.tostring(abuf, 64); \
         sqrat expected = sqrat(p,q); \
         expected.tostring(pqbuf, 64); \
+        gmp_snprintf(thingbuf, 64, thing, ## args); \
         DO_TEST((a == expected), "Expected %s == %s, got %s", \
-                thing, pqbuf, abuf); \
+                thingbuf, pqbuf, abuf); \
     } while (0)
 
 #endif

@@ -52,6 +52,11 @@ sqrat::sqrat(long num, long denom) : v(num, denom)
     v.canonicalize();
 }
 
+sqrat::sqrat(mpz_class num, mpz_class denom) : v(num, denom)
+{
+    v.canonicalize();
+}
+
 sqrat::sqrat(long i) : v(sign_square(i)) {}
 sqrat::sqrat() : v(0) {}
 

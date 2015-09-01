@@ -21,6 +21,15 @@ The library functions similarly to the program associated with
 Kaeding and Williams. However, this library is only based on
 the above two papers, and not on the original program.
 
+Note that we do not use the expression for the SU(2) Clebsch-Gordans
+given in Kaeding and Williams. Instead, we use the expression given
+in page 172 of:
+
+* Arno Bohm
+  Quantum Mechanics: Foundations and Applications, 3rd edition
+  Springer-Verlag (1993)
+  ISBN: 0-387-97944-1
+
 Acknowledgements
 ----------------
 

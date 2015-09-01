@@ -273,3 +273,13 @@ isoarray* isoscalars(long p, long q, long p1, long q1, long p2, long q2)
     delete res; // Also deletes 'coefficients'
     throw std::logic_error("Calculation of ISFs failed");
 }
+
+/* Wrapper around the above to provide an array of Clebsch-Gordans instead */
+cgarray* clebsch_gordans(long p, long q, long p1, long q1, long p2, long q2)
+{
+    isoarray* isf = isoscalars(p, q, p1, q1, p2, q2);
+    cgarray* cg = isf->to_cgarray();
+
+    delete isf;
+    return cg;
+}

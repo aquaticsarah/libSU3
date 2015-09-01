@@ -16,6 +16,7 @@ public:
 
     sqrat(mpq_class v);
     sqrat(long, long);
+    sqrat(mpz_class, mpz_class);
     sqrat(long);
     sqrat();
 
@@ -113,6 +114,10 @@ class cgarray;
 /* A class to hold the isoscalar factors for a particular coupling */
 class isoarray
 {
+private:
+    size_t size; // Size of the following array
+    const sqrat* isf_array;
+
 public:
     /* Target and factor reps */
     const long p, q, p1, q1, p2, q2;
@@ -120,18 +125,50 @@ public:
     /* Degeneracy of target rep */
     const long d;
 
-    const sqrat* coefficients;
-
     /* Note: This type takes ownership of the array passed in - that is, it will
         delete the array when the isoarray object is deleted. */
     isoarray(long p, long q, long p1, long q1, long p2, long q2, long d,
-                sqrat* coefficients);
+                sqrat* isf_array);
     ~isoarray();
 
     /* We use operator() instead of operator[] as an easy way to use
         multiple indices */
     sqrat operator()(long n, long k, long l, long k1, long l1,
                         long k2, long l2);
+
+    /* Convert to Clebsch-Gordans */
+    cgarray* to_cgarray();
+};
+
+/* A class to hold the Clebsch-Gordan coefficients for a particular coupling */
+class cgarray
+{
+private:
+    /* Store the isoscalar factors for this coupling */
+    size_t size; // Size of the following array
+    const sqrat* isf_array;
+
+public:
+    /* Target and factor reps */
+    const long p, q, p1, q1, p2, q2;
+
+    /* Degeneracy of target rep */
+    const long d;
+
+    /* Note: This type takes ownership of the array passed in - that is, it will
+        delete the array when the isoarray object is deleted. */
+    cgarray(long p, long q, long p1, long q1, long p2, long q2, long d,
+                sqrat* isf_array);
+    ~cgarray();
+
+    /* We use operator() instead of operator[] as an easy way to use
+        multiple indices */
+    sqrat operator()(long n, long k, long l, long m,
+                        long k1, long l1, long m1,
+                        long k2, long l2, long m2);
+
+    /* Convert to ISFs */
+    isoarray* to_isoarray();
 };
 
 /* Information about representations */
@@ -139,7 +176,12 @@ long dimension(long p, long q);
 char* repname(char* buffer, size_t len, long p, long q);
 long degeneracy(long p, long q, long p1, long q1, long p2, long q2);
 
-/* Main calculation function */
+/* Calculate a single SU(2) Clebsch-Gordan coefficient */
+sqrat su2_cgc(mpq_class I, mpq_class Iz, mpq_class i1, mpq_class i1z,
+                mpq_class i2, mpq_class i2z);
+
+/* Main calculation functions */
 isoarray* isoscalars(long p, long q, long p1, long q1, long p2, long q2);
+cgarray* clebsch_gordans(long p, long q, long p1, long q1, long p2, long q2);
 
 #endif
