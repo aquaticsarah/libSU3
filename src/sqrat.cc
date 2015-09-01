@@ -15,83 +15,55 @@ static long sign_square(long x)
 
 /* Helper: Calculate the square root of an integer, which must be a square.
     Raises an exception if the values is not a square */
-static long isqrt(long x)
+static mpq_class sqrt(mpq_class x)
 {
     if (x < 0) throw std::domain_error("Value is not a square");
 
-    /* Use doubles to get an approximation to sqrt(x).
-        We can guarantee that this approximation is within
-        +-1 of the true value */
-    long approx = lrint(sqrt((double)x));
-    long approx_sq = approx * approx;
+    /* Try to square-root the numerator and denominator independently.
+        Note that mpz_root() returns 0 iff the value passed into it
+        is not a perfect square.
+    */
+    mpz_t num, denom;
+    mpz_inits(num, denom, NULL);
 
-    if (approx_sq < x)
+    if ((! mpz_root(num, x.get_num_mpz_t(), 2))
+     || (! mpz_root(denom, x.get_den_mpz_t(), 2)))
     {
-        if ((approx+1)*(approx+1) == x)
-            return approx+1;
-        else throw std::domain_error("Value is not a square");
+        mpz_clears(num, denom, NULL);
+        throw std::domain_error("Value is not a square");
     }
-    else if (approx_sq > x)
-    {
-        if ((approx-1)*(approx-1) == x)
-            return approx-1;
-        else throw std::domain_error("Value is not a square");
-    }
-    else return approx;
+
+    mpq_class res = mpq_class(mpz_class(num), mpz_class(denom));
+    mpz_clears(num, denom, NULL);
+    return res;
 }
 
-/* Reduce a fraction to its lowest terms */
-void sqrat::reduce()
-{
-    long d = gcd(p, q);
-    p /= d;
-    q /= d;
-
-    /* Make sure that q is nonnegative */
-    if (q < 0)
-    {
-        p = -p;
-        q = -q;
-    }
-}
-
-/* Various constructors */
-sqrat::sqrat(long num, long denom) : p(num), q(denom)
-{
-    /* Prevent division by zero */
-    if (denom == 0)
-        throw std::domain_error("Division by zero when constructing sqrat");
-
-    reduce();
-}
-
-/* Note that when initialising with an integer,
+/* Various constructors
+   Note that when initialising with an integer,
    we need to square it because all our fractions are
    implicitly under a square root sign */
-sqrat::sqrat(long i) : p(sign_square(i)), q(1) {}
-
-sqrat::sqrat() : p(0), q(1) {}
-
-/* Temporary functions to get components; TODO: Remove */
-long sqrat::numerator()
+sqrat::sqrat(mpq_class v) : v(v)
 {
-    return p;
+    v.canonicalize();
 }
 
-long sqrat::denominator()
+sqrat::sqrat(long num, long denom) : v(num, denom)
 {
-    return q;
+    v.canonicalize();
 }
+
+sqrat::sqrat(long i) : v(sign_square(i)) {}
+sqrat::sqrat() : v(0) {}
 
 /* Unary operators */
 sqrat sqrat::operator+()
 {
-    return sqrat(p, q);
+    return sqrat(+v);
 }
 
 sqrat sqrat::operator-()
 {
-    return sqrat(-p, q);
+    return sqrat(-v);
 }
 
 /* Arithmetic. Note that for multiplication by scalars,
@@ -99,7 +71,7 @@ sqrat sqrat::operator-()
    implicitly under a square root sign */
 sqrat sqrat::operator*(sqrat other)
 {
-    return sqrat(p * other.p, q * other.q);
+    return sqrat(v * other.v);
 }
 
 sqrat sqrat::operator*(long other)
@@ -110,16 +82,14 @@ sqrat sqrat::operator*(long other)
 sqrat* sqrat::operator*=(sqrat other)
 {
     sqrat res = *this * other;
-    p = res.p;
-    q = res.q;
+    v = res.v;
     return this;
 }
 
 sqrat* sqrat::operator*=(long other)
 {
     sqrat res = *this * other;
-    p = res.p;
-    q = res.q;
+    v = res.v;
     return this;
 }
 
@@ -132,7 +102,14 @@ sqrat operator*(long left, sqrat right)
 
 sqrat sqrat::operator/(sqrat other)
 {
-    return sqrat(p * other.q, q * other.p);
+    /* Special case: If dividing by 0, we need to raise an exception,
+       instead of actually doing the division (which would cause a
+       SIGFPE, which we can't catch)
+    */
+    if (other.v == 0)
+        throw std::domain_error("sqrat: division by zero");
+
+    return sqrat(v / other.v);
 }
 
 sqrat sqrat::operator/(long other)
@@ -143,16 +120,14 @@ sqrat sqrat::operator/(long other)
 sqrat* sqrat::operator/=(sqrat other)
 {
     sqrat res = *this / other;
-    p = res.p;
-    q = res.q;
+    v = res.v;
     return this;
 }
 
 sqrat* sqrat::operator/=(long other)
 {
     sqrat res = *this / other;
-    p = res.p;
-    q = res.q;
+    v = res.v;
     return this;
 }
 
@@ -163,49 +138,42 @@ sqrat operator/(long left, sqrat right)
 
 /* Addition and subtraction are a bit more complicated.
     The general form is:
-    +- sqrt(p/q) = (+- sqrt(r/s)) +- (+- sqrt(t/u))
+    +- sqrt(|x|) = (+- sqrt(|v|)) +- (+- sqrt(|w|))
     where each of the four +- signs is independent.
 
-    By playing around with overall signs, we can reduce to two cases:
-    (q,r,s,t,u all >=0, but the sign of p is to be determined later)
-    sqrt(|p|/q) = sqrt(r/s) +- sqrt(t/u)
- => |p|/q = r/s +- 2 sqrt(rt/su) + t/u
- => |p|/q = 1/su (ru +- 2 sqrt(rtsu) + st)
-    so we can set |p| = ru +- 2 sqrt(rtsu) + st, q = su and then reduce.
+    By playing around with overall signs, we can fix v,w to be positive.
+    Then we just have two cases:
+    sqrt(|x|) = sqrt(v) +- sqrt(w)
+ => |x| = v +- 2 sqrt(vw) + w
 
-    Now we have to consider the sign of p. As r,s,t,u >= 0, the only way
-    p can be negative is if we are subtracting. In that case, it happens
-    iff r*u < s*t.
+    Now we have to consider the sign of x. As v,w >= 0, the only way
+    x can be negative is if we are subtracting, and if v < w.
 
     We have a helper function to deal with these reduced cases, then the
     operator+ and operator- methods just need to deal with signs.
     The 'sign' argument chooses between + (if 1) and - (if 0) */
 static sqrat add_internal(sqrat left, sqrat right, int sign)
 {
-    long r,s,t,u;
-    r = left.numerator();
-    s = left.denominator();
-    t = right.numerator();
-    u = right.denominator();
+    mpq_class v = left.v, w = right.v;
 
-    if (sign)           return sqrat(r*u + 2*isqrt(r*s*t*u) + s*t, s*u);
-    else if (r*u < s*t) return sqrat(-r*u + 2*isqrt(r*s*t*u) - s*t, s*u);
-    else                return sqrat(r*u - 2*isqrt(r*s*t*u) + s*t, s*u);
+    if (sign)       return sqrat(v + 2*sqrt(mpq_class(v*w)) + w);
+    else if (v < w) return sqrat(-v + 2*sqrt(mpq_class(v*w)) - w);
+    else            return sqrat(v - 2*sqrt(mpq_class(v*w)) + w);
 }
 
 /* Addition and subtraction */
 sqrat sqrat::operator+(sqrat other)
 {
-    if (p >= 0)
+    if (v >= 0)
     {
-        if (other.p >= 0)
+        if (other.v >= 0)
             return add_internal(*this, other, 1);
         else
             return add_internal(*this, -other, 0);
     }
     else
     {
-        if (other.p >= 0)
+        if (other.v >= 0)
             return -add_internal(-*this, other, 0);
         else
             return -add_internal(-*this, -other, 1);
@@ -220,16 +188,14 @@ sqrat sqrat::operator+(long other)
 sqrat* sqrat::operator+=(sqrat other)
 {
     sqrat res = *this + other;
-    p = res.p;
-    q = res.q;
+    v = res.v;
     return this;
 }
 
 sqrat* sqrat::operator+=(long other)
 {
     sqrat res = *this + other;
-    p = res.p;
-    q = res.q;
+    v = res.v;
     return this;
 }
 
@@ -242,16 +208,16 @@ sqrat operator+(long left, sqrat right)
 
 sqrat sqrat::operator-(sqrat other)
 {
-    if (p >= 0)
+    if (v >= 0)
     {
-        if (other.p >= 0)
+        if (other.v >= 0)
             return add_internal(*this, other, 0);
         else
             return add_internal(*this, -other, 1);
     }
     else
     {
-        if (other.p >= 0)
+        if (other.v >= 0)
             return -add_internal(-*this, other, 1);
         else
             return -add_internal(-*this, -other, 0);
@@ -266,16 +232,14 @@ sqrat sqrat::operator-(long other)
 sqrat* sqrat::operator-=(sqrat other)
 {
     sqrat res = *this - other;
-    p = res.p;
-    q = res.q;
+    v = res.v;
     return this;
 }
 
 sqrat* sqrat::operator-=(long other)
 {
     sqrat res = *this - other;
-    p = res.p;
-    q = res.q;
+    v = res.v;
     return this;
 }
 
@@ -286,15 +250,15 @@ sqrat operator-(long left, sqrat right)
 
 
 
-sqrat sqrt(sqrat v)
+sqrat sqrt(sqrat value)
 {
-    return sqrat(isqrt(v.p), isqrt(v.q));
+    return sqrat(sqrt(value.v));
 }
 
 /* Comparisons */
 bool sqrat::operator<(sqrat other)
 {
-    return p*other.q < q*other.p;
+    return v < other.v;
 }
 
 bool sqrat::operator<(long other)
@@ -311,7 +275,7 @@ bool operator<(long left, sqrat right)
 
 bool sqrat::operator<=(sqrat other)
 {
-    return p*other.q <= q*other.p;
+    return v <= other.v;
 }
 
 bool sqrat::operator<=(long other)
@@ -328,7 +292,7 @@ bool operator<=(long left, sqrat right)
 
 bool sqrat::operator==(sqrat other)
 {
-    return (p == other.p) && (q == other.q);
+    return v == other.v;
 }
 
 bool sqrat::operator==(long other)
@@ -345,7 +309,7 @@ bool operator==(long left, sqrat right)
 
 bool sqrat::operator!=(sqrat other)
 {
-    return (p != other.p) || (q != other.q);
+    return v != other.v;
 }
 
 bool sqrat::operator!=(long other)
@@ -362,7 +326,7 @@ bool operator!=(long left, sqrat right)
 
 bool sqrat::operator>(sqrat other)
 {
-    return p*other.q > q*other.p;
+    return v > other.v;
 }
 
 bool sqrat::operator>(long other)
@@ -379,7 +343,7 @@ bool operator>(long left, sqrat right)
 
 bool sqrat::operator>=(sqrat other)
 {
-    return p*other.q >= q*other.p;
+    return v >= other.v;
 }
 
 bool sqrat::operator>=(long other)
@@ -397,14 +361,17 @@ bool operator>=(long left, sqrat right)
 /* Conversions to various types */
 char* sqrat::tostring(char* buffer, size_t len)
 {
-    if (p < 0)
-        snprintf(buffer, len, "-sqrt(%ld/%ld)", -p, q);
+    if (v < 0)
+    {
+        mpq_class w = -v;
+        gmp_snprintf(buffer, len, "-sqrt(%Qd)", w);
+    }
     else
-        snprintf(buffer, len, "sqrt(%ld/%ld)", p, q);
+        gmp_snprintf(buffer, len, "sqrt(%Qd)", v);
     return buffer;
 }
 
 double sqrat::todouble()
 {
-    return sqrt(p / (double)q);
+    return sqrt(v.get_d());
 }

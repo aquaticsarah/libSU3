@@ -4,24 +4,20 @@
 #define __SU3_H__
 
 #include <stddef.h>
+#include <gmpxx.h>
 
 /* Class to represent (+ or -) the square root of a rational.
-    The actual value represented is (sign(p) * sqrt(|p| / q))
+    The actual value represented is sign(v) * |v|
 */
 class sqrat
 {
-private:
-    long p;
-    long q;
-    void reduce();
-
 public:
+    mpq_class v;
+
+    sqrat(mpq_class v);
     sqrat(long, long);
     sqrat(long);
     sqrat();
-
-    long numerator();
-    long denominator();
 
     /* Arithmetic operations */
     sqrat operator+();

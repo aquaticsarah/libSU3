@@ -42,7 +42,7 @@ LIB_INCLUDE := $(INCLUDE) -I src/
 TEST_INCLUDE := $(INCLUDE) -I tests/
 
 LD := g++
-LDFLAGS := -ggdb
+LDFLAGS := -ggdb -lgmpxx -lgmp
 
 MKDEP := g++ -MM -MP
 

@@ -35,9 +35,10 @@ extern int tests_passed;
     { \
         char abuf[64], pqbuf[64]; \
         a.tostring(abuf, 64); \
-        sqrat(p,q).tostring(pqbuf, 64); \
-        DO_TEST((a.numerator() == p) && (a.denominator() == q), \
-            "Expected %s == %s, got %s", thing, pqbuf, abuf); \
+        sqrat expected = sqrat(p,q); \
+        expected.tostring(pqbuf, 64); \
+        DO_TEST((a == expected), "Expected %s == %s, got %s", \
+                thing, pqbuf, abuf); \
     } while (0)
 
 #endif
