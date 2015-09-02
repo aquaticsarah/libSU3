@@ -11,8 +11,6 @@
 
 TEST(su2)
 {
-    /* TODO: Test that the couplings are normalised */
-
     /* Test values for 1/2 x 1/2 -> 0 + 1 */
     mpq_class half = mpq_class(1, 2);
     mpq_class three_half = mpq_class(3, 2);

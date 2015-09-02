@@ -31,7 +31,11 @@ sqrat isoscalar_context::isf(long n, long k, long l, long k1, long l1,
     assert((k2 >= q2-1) && (k2 <= p2+q2+1));
     assert((l2 >= -1) && (l2 <= q2+1));
 
-    /* Check hypercharge conservation */
+    /* Check hypercharge conservation.
+        Note that, unlike isoarray/cgarray, we error out if this isn't
+        satisfied. This is because library-internal code should *always*
+        obey hypercharge conservation, but external code need not do so.
+    */
     assert(k1+l1+k2+l2-k-l == (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3);
 
     /* If compiled with -DNDEBUG, this line is to remove a compiler warning

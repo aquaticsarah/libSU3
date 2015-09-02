@@ -39,10 +39,9 @@ static mpz_class factorial(mpq_class x)
 
     if (v < 0) throw std::domain_error("Factorial of a negative number");
 
-    mpz_t res;
-    mpz_init(res);
-    mpz_fac_ui(res, v);
-    return mpz_class(res);
+    mpz_class res;
+    mpz_fac_ui(res.get_mpz_t(), v);
+    return res;
 }
 
 /* Calculate a single SU(2) Clebsch-Gordan coefficient.

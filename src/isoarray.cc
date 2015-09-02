@@ -35,7 +35,8 @@ sqrat isoarray::operator()(long n, long k, long l, long k1, long l1,
     assert((l2 >= 0) && (l2 <= q2));
 
     /* Check hypercharge conservation */
-    assert(k1+l1+k2+l2-k-l == (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3);
+    if(k1+l1+k2+l2-k-l != (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3)
+        return sqrat(0);
 
     /* If compiled with -DNDEBUG, this line is to remove a compiler warning
         about l2 being unused */
