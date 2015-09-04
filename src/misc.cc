@@ -18,6 +18,11 @@ long min(long a, long b, long c, long d)
     return min(min(a, b), min(c, d));
 }
 
+long min(long a, long b, long c, long d, long e, long f, long g, long h, long i)
+{
+    return min(min(a, b, c), min(d, e, f), min(g, h, i));
+}
+
 long max(long a, long b)
 {
     return (a > b) ? a : b;

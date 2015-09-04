@@ -250,13 +250,15 @@ int isoscalar_context::calc_shw()
     /* Orthonormalise the ISFs for different representations.
        We orthogonalise each rep against *later* reps in order to get equivalent
        results to the algorithm described in our references. */
-    for (n = 0; n < d; ++n)
+    for (n = d-1; n >= 0; --n)
     {
         sqrat v;
         for (m = n+1; m < d; ++m)
         {
-            /* Factor to multiply rep 'm' by when subtracting from rep 'n' */
-            v = inner_product(m, n) / inner_product(m, m);
+            /* Factor to multiply rep 'm' by when subtracting from rep 'n'.
+                Note that, when we get here, rep 'm' is already normalised.
+            */
+            v = inner_product(m, n);
 
             for (k1 = q1; k1 <= p1+q1; ++k1)
                 for (l1 = 0; l1 <= q1; ++l1)
@@ -292,6 +294,7 @@ int isoscalar_context::calc_shw()
             k2max -= 1;
             l2min += 1;
         }
+
         /* If this state has negative coupling, we need to negate the rep,
             in order to match the sign convention */
         if (isf(n, p+q, 0, p1+q1, 0, k2max, l2min) < 0)

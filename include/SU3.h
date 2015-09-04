@@ -87,6 +87,33 @@ bool operator!=(long, sqrat);
 bool operator>(long, sqrat);
 bool operator>=(long, sqrat);
 
+/* Classes to hold SU(3) isoscalar factors and Clebsch-Gordan coefficients.
+
+   Notes on indexing:
+   - For each of the three reps involved, we have the following ranges:
+      q <= k <= p+q (for a total of p+1 possible values of k)
+      0 <= l <= q   (for a total of q+1 possible values of l)
+     The value of 'l' can be used as an index directly, but that for
+     'k' needs to be shifted down by q.
+
+   - All reps in a degenerate set need to be processed at once, so we
+     allocate storage all at once.
+
+   Implementation details:
+   - Sometimes, when calculating ISFs, we apply a recursion relation involving
+     values which are one space "off the edge" of the valid range (eg, with
+     l1=-1). In order to simplify this code, we allow indexes of that form,
+     but *only* for the internal-only isoscalar_context class.
+
+   - Given k, l, k1, l1, k2, there is a unique valid value of l2 determined
+     by hypercharge conservation. As such, we can save a factor of (q2+1) on
+     memory space by not allocating an l2 axis.
+     However, we do accept l2 as an argument and, unless -DNDEBUG is specified
+     when compiling the library, we check that it is valid.
+*/
+class isoarray;
+class cgarray;
+
 /* A class to hold the isoscalar factors for a particular coupling */
 class isoarray
 {
@@ -106,9 +133,9 @@ public:
     ~isoarray();
 
     /* We use operator() instead of operator[] as an easy way to use
-    multiple indices */
+        multiple indices */
     sqrat operator()(long n, long k, long l, long k1, long l1,
-                    long k2, long l2);
+                        long k2, long l2);
 };
 
 /* Information about representations */

@@ -9,6 +9,7 @@
 long min(long, long);
 long min(long, long, long);
 long min(long, long, long, long);
+long min(long, long, long, long, long, long, long, long, long);
 long max(long, long);
 long max(long, long, long);
 long max(long, long, long, long, long, long);
@@ -88,8 +89,8 @@ private:
        to extract the original coupling coefficients.
        The function returns 1 on sucess, 0 on failure.
     */
-    int step_s_down(long n, long s,
-            long k1min, long k1max, long l1min, long l1max);
+    int step_s_down(long n, long s, long k1min, long k1max,
+                    long l1min, long l1max);
 
     /* Calculate the inner product of two sets of isoscalar factors */
     sqrat inner_product(long m, long n);
@@ -102,7 +103,8 @@ private:
 
     /* Allow the top-level driver function to interact with
         objects of this class */
-    friend isoarray* isoscalars(long p, long q, long p1, long q1, long p2, long q2);
+    friend isoarray* isoscalars(long p, long q, long p1, long q1,
+                                long p2, long q2);
 };
 
 #endif

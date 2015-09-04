@@ -10,3 +10,4 @@ overflow
 * Calculate when we can use the various recursion relations, instead of
 trying them all every time
 * Add lots more tests
+* Benchmarks?

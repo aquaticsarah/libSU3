@@ -1,4 +1,6 @@
-/* libSU3: Externally-visible container for isoscalar coefficients */
+/* libSU3: Externally-visible container for isoscalar coefficients
+    For some notes on how the indexing is done, see include/SU3.h
+*/
 
 #include <assert.h>
 
@@ -32,6 +34,10 @@ sqrat isoarray::operator()(long n, long k, long l, long k1, long l1,
 
     /* Check hypercharge conservation */
     assert(k1+l1+k2+l2-k-l == (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3);
+
+    /* If compiled with -DNDEBUG, this line is to remove a compiler warning
+        about l2 being unused */
+    (void)l2;
 
     size_t index = ((((n * (p+1) + k-q) * (q+1) + l) * (p1+1) + k1-q1)
                     * (q1+1) + l1) * (p2+1) + k2-q2;

@@ -32,7 +32,7 @@ DIRS := $(sort $(dir $(FILES)))
 
 # Toolchain
 CC := g++ -c
-CFLAGS := -Wall -Wextra -Werror -ggdb
+CFLAGS := -Wall -Wextra -Werror -DNDEBUG -ggdb
 
 # Include lists for library code and for the tests
 # (each of which has internal headers which shouldn't be used

@@ -17,24 +17,7 @@ isoscalar_context::isoscalar_context(long p, long q, long p1,
 }
 
 /* Functions to get/set particular isoscalar factors.
-
-   Notes on indexing:
-   - For each of the three reps involved, we have the following ranges:
-      q <= k <= p+q (for a total of p+1 possible values of k)
-      0 <= l <= q   (for a total of q+1 possible values of l)
-     The value of 'l' can be used as an index directly, but that for
-     'k' needs to be shifted down by q.
-
-   - In order to simplify the usage of recursion relations, we allow code to
-     request values one space "off the edge" of the valid range (eg, with
-     l1=-1). We only allow this when getting values, not when setting them.
-
-   - All reps in a degenerate set need to be processed at once, so we
-     allocate storage all at once.
-
-   - We can infer the value of l2 from the values of k,l,k1,l1,k1 using
-     hypercharge conservation. As such, we don't need an axis for l2.
-     We do check that the value provided is correct; TODO: make this optional.
+    For some notes on how the indexing is done, see include/SU3.h
 */
 sqrat isoscalar_context::isf(long n, long k, long l, long k1, long l1,
                             long k2, long l2)
@@ -50,6 +33,10 @@ sqrat isoscalar_context::isf(long n, long k, long l, long k1, long l1,
 
     /* Check hypercharge conservation */
     assert(k1+l1+k2+l2-k-l == (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3);
+
+    /* If compiled with -DNDEBUG, this line is to remove a compiler warning
+        about l2 being unused */
+    (void)l2;
 
     /* Return zero for values outside of range */
     if (   (k  < q ) || (k  > p +q ) || (l  < 0) || (l  > q )
@@ -77,6 +64,10 @@ void isoscalar_context::set_isf(long n, long k, long l, long k1, long l1,
 
     /* Check hypercharge conservation */
     assert(k1+l1+k2+l2-k-l == (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3);
+
+    /* If compiled with -DNDEBUG, this line is to remove a compiler warning
+        about l2 being unused */
+    (void)l2;
 
     size_t index = ((((n * (p+1) + k-q) * (q+1) + l) * (p1+1) + k1-q1)
                     * (q1+1) + l1) * (p2+1) + k2-q2;
@@ -199,9 +190,6 @@ isoarray* isoscalars(long p, long q, long p1, long q1, long p2, long q2)
         This relates the isoscalar factors for r1 x r2 -> R to those for
         Rbar x r2 -> r1bar.
     */
-
-    /* TODO: Check that degeneracy is the same under symmetry relations */
-    assert(d == degeneracy(q1, p1, q, p, p2, q2));
     size_t alt_size = d * (q1+1) * (p1+1) * (q+1) * (p+1) * (p2+1);
     sqrat* alt_coefficients = new sqrat[alt_size];
     isoscalar_context* alt_ctx = new isoscalar_context(q1, p1, q, p, p2, q2,
@@ -240,7 +228,6 @@ isoarray* isoscalars(long p, long q, long p1, long q1, long p2, long q2)
     delete alt_ctx;
     delete[] alt_coefficients;
 
-    assert(d == degeneracy(q2, p2, q, p, p1, q1));
     alt_size = d * (q2+1) * (p2+1) * (q+1) * (p+1) * (p1+1);
     alt_coefficients = new sqrat[alt_size];
     alt_ctx = new isoscalar_context(q2, p2, q, p, p1, q1, d, alt_coefficients);

@@ -140,24 +140,36 @@ void isoscalar_context::d_coefficients(long k, long k1, long l1,
     denominator = (k-q+1)*(p+q-k);
     beta = sqrat(numerator, denominator);
 
-    numerator = 4*(k1+2)*(k1-q1+1)*(p1+q1-k1)*(k1-l1+1);
-    denominator = (k1-l1+2)*(k+s+4)*(k+t+2);
-    d1 = sqrat(numerator, denominator);
+    /* If k+t+2==0, then the state at which we are evaluating the recurrence
+        relation is invalid (as it requires I=(I_2 - I_1) - 1, but in fact we
+        have I >= I_2 - I_1).
+        Hence we need to replace some coefficients by zero */
+    if (k+t+2 == 0)
+    {
+        d1 = sqrat(0);
+        d3 = sqrat(0);
+    }
+    else
+    {
+        numerator = 4*(k1+2)*(k1-q1+1)*(p1+q1-k1)*(k1-l1+1);
+        denominator = (k1-l1+2)*(k+s+4)*(k+t+2);
+        d1 = sqrat(numerator, denominator);
+
+        /* If k2==l2, d3 is infinite or indeterminate. But in that case,
+            it is the coefficient of a state with l2>k2, which is impossible
+            (ie, there must be zero coupling). Thus we can just replace it by 0.
+        */
+        if (k2 == l2)
+            d3 = sqrat(0);
+        else
+        {
+            numerator = (l2+1)*(q2-l2)*(p2+q2-l2+1)*(s-k);
+            denominator = (k2-l2)*(k2-l2+1)*(k+t+2);
+            d3 = sqrat(numerator, denominator);
+        }
+    }
 
     numerator = (k2+2)*(k2-q2+1)*(p2+q2-k2)*(k-t+2);
     denominator = (k2-l2+1)*(k2-l2+2)*(k+s+4);
     d2 = sqrat(numerator, denominator);
-
-    /* If k2==l2, d3 is infinite or indeterminate. But in that case,
-        it is the coefficient of a state with l2>k2, which is impossible
-        (ie, there must be zero coupling). Thus we can just replace it by 0.
-    */
-    if (k2 == l2)
-        d3 = sqrat(0);
-    else
-    {
-        numerator = (l2+1)*(q2-l2)*(p2+q2-l2+1)*(s-k);
-        denominator = (k2-l2)*(k2-l2+1)*(k+t+2);
-        d3 = sqrat(numerator, denominator);
-    }
 }
