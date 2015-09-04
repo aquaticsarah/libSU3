@@ -369,10 +369,10 @@ char* sqrat::tostring(char* buffer, size_t len)
     if (v < 0)
     {
         mpq_class w = -v;
-        gmp_snprintf(buffer, len, "-sqrt(%Qd)", w);
+        gmp_snprintf(buffer, len, "-sqrt(%Qd)", w.get_mpq_t());
     }
     else
-        gmp_snprintf(buffer, len, "sqrt(%Qd)", v);
+        gmp_snprintf(buffer, len, "sqrt(%Qd)", v.get_mpq_t());
     return buffer;
 }
 

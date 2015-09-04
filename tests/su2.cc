@@ -6,8 +6,9 @@
 #define TEST_SU2_CG(I, Iz, i1, i1z, i2, i2z, p, q) \
     TEST_EQ_SQRAT(su2_cgc(I, Iz, i1, i1z, i2, i2z), p, q, \
         "<%Qd,%Qd| (|%Qd,%Qd> x |%Qd,%Qd>)", \
-        mpq_class(I), mpq_class(Iz), mpq_class(i1), mpq_class(i1z), \
-        mpq_class(i2), mpq_class(i2z))
+        mpq_class(I).get_mpq_t(), mpq_class(Iz).get_mpq_t(), \
+        mpq_class(i1).get_mpq_t(), mpq_class(i1z).get_mpq_t(), \
+        mpq_class(i2).get_mpq_t(), mpq_class(i2z).get_mpq_t())
 
 TEST(su2)
 {
