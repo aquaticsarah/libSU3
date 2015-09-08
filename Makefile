@@ -1,56 +1,15 @@
 # libSU3: Instructions for building various files
 
-# Where to place intermediate files
-BUILDDIR := /tmp/libSU3
+# Load configuration
+include config.mk
 
-# Autodetect source files
-SRC := $(wildcard src/*.cc)
-TEST_SRC := $(wildcard tests/*.cc)
-
-# Various files which we will produce
-OBJ := $(SRC:src/%.cc=$(BUILDDIR)/%.o)
-TEST_OBJ := $(TEST_SRC:tests/%.cc=$(BUILDDIR)/tests/%.o)
-
-DEP := $(SRC:src/%.cc=$(BUILDDIR)/%.d)
-TEST_DEP := $(TEST_SRC:tests/%.cc=$(BUILDDIR)/tests/%.d)
-
-TEST_RUNNER := $(BUILDDIR)/tests/run.cc
-TEST_RUNNER_OBJ := $(BUILDDIR)/tests/run.o
-TEST_RUNNER_DEP := $(BUILDDIR)/tests/run.d
-
-BUILD_FILES := $(OBJ) $(DEP)
-TEST_FILES := $(TEST_OBJ) $(TEST_DEP) $(TEST_RUNNER) $(TEST_RUNNER_OBJ) $(TEST_RUNNER_DEP)
-
-# Only build the files we need
-ifeq ($(findstring test,$(MAKECMDGOALS)),)
-FILES := $(BUILD_FILES)
-else
-FILES := $(BUILD_FILES) $(TEST_FILES)
-endif
-
-DIRS := $(sort $(dir $(FILES)))
-
-# Toolchain
-CC := g++ -c
-CFLAGS := -Wall -Wextra -Werror -DNDEBUG -ggdb
-
-# Include lists for library code and for the tests
-# (each of which has internal headers which shouldn't be used
-#  by the other)
-INCLUDE := -I include/
-LIB_INCLUDE := $(INCLUDE) -I src/
-TEST_INCLUDE := $(INCLUDE) -I tests/
-
-# External libraries to link against
-LIBRARIES := -lgmpxx -lgmp
-
-LD := g++
-LDFLAGS := -ggdb
-
-MKDEP := g++ -MM -MP
+# Autodetect source files and fill out relevant variables
+include autodetect.mk
 
 # Top-level targets
 default: libSU3.a
+debug: libSU3-debug.a
+profile: libSU3-prof.a
 
 test: run-tests
 	@echo "Running tests"
@@ -63,33 +22,41 @@ clean:
 clean-all:
 	@echo "Cleaning up everything"
 	@rm -rf $(BUILDDIR)/
-	@rm -f libSU3.a run-tests
+	@rm -f libSU3*.a run-tests
+
+# Intermediate files
+libSU3.a libSU3-debug.a libSU3-prof.a:
+	@echo "AR $@"
+	@ar rcsu $@ $?
 
 libSU3.a: $(OBJ)
-	@echo "AR $@"
-	@ar rcsu $@ $(OBJ)
+libSU3-debug.a: $(DEBUG_OBJ)
+libSU3-prof.a: $(PROFILE_OBJ)
 
-# Intermediate targets
-run-tests: $(TEST_OBJ) $(TEST_RUNNER_OBJ) libSU3.a
+run-tests: $(TEST_OBJ) $(TEST_RUNNER_OBJ) libSU3-debug.a
 	@echo "Linking test driver"
-	@$(LD) $(LDFLAGS) $(TEST_OBJ) $(TEST_RUNNER_OBJ) libSU3.a $(LIBRARIES) -o $@
+	@$(LD) $(DEBUG_LDFLAGS) $^ $(LIBRARIES) -o $@
 
-# Rules to build object files and dependency information
-$(OBJ):$(BUILDDIR)/%.o: src/%.cc | $(DIRS)
+# The object files and dependency information can be done in a uniform way across
+# the library and its tests. The only difference is which directories should be
+# searched for include files.
+$(BUILDDIR)/%.o: %.cc | $(DIRS)
 	@echo "CC $<"
-	@$(CC) $(CFLAGS) $(LIB_INCLUDE) $< -o $@
+	@$(CC) $(CFLAGS) $(THIS_INCLUDE) $< -o $(BUILDDIR)/$*.o \
+		-MMD -MQ $(BUILDDIR)/$*.o -MQ $(BUILDDIR)/$*.d -MF $(BUILDDIR)/$*.d
 
-$(DEP):$(BUILDDIR)/%.d: src/%.cc | $(DIRS)
-	@echo "MKDEP $<"
-	@$(MKDEP) $(LIB_INCLUDE) $< -MQ $(BUILDDIR)/$*.o -MQ $@ -MF $@
+$(BUILDDIR)/debug/%.o: %.cc | $(DIRS)
+	@echo "CC $< [DEBUG]"
+	@$(CC) $(DEBUG_CFLAGS) $(THIS_INCLUDE) $< -o $(BUILDDIR)/debug/$*.o \
+		-MMD -MQ $(BUILDDIR)/debug/$*.o -MQ $(BUILDDIR)/debug/$*.d -MF $(BUILDDIR)/debug/$*.d
 
-$(TEST_OBJ):$(BUILDDIR)/tests/%.o: tests/%.cc | $(DIRS)
-	@echo "CC $<"
-	@$(CC) $(CFLAGS) $(TEST_INCLUDE) $< -o $@
+$(BUILDDIR)/prof/%.o: %.cc | $(DIRS)
+	@echo "CC $< [PROFILE]"
+	@$(CC) $(PROFILE_CFLAGS) $(THIS_INCLUDE) $< -o $(BUILDDIR)/prof/$*.o \
+		-MMD -MQ $(BUILDDIR)/prof/$*.o -MQ $(BUILDDIR)/prof/$*.d -MF $(BUILDDIR)/prof/$*.d
 
-$(TEST_DEP):$(BUILDDIR)/tests/%.d: tests/%.cc | $(DIRS)
-	@echo "MKDEP $<"
-	@$(MKDEP) $(TEST_INCLUDE) $< -MQ $(BUILDDIR)/tests/$*.o -MQ $@ -MF $@
+$(OBJ) $(DEBUG_OBJ) $(PROFILE_OBJ): THIS_INCLUDE=$(LIB_INCLUDE)
+$(TEST_OBJ): THIS_INCLUDE=$(TEST_INCLUDE)
 
 # The test runner file needs its own rules
 $(TEST_RUNNER): scripts/gen_test_runner.py tests/*.cc | $(DIRS)
@@ -97,22 +64,13 @@ $(TEST_RUNNER): scripts/gen_test_runner.py tests/*.cc | $(DIRS)
 	@scripts/gen_test_runner.py $@
 
 $(TEST_RUNNER_OBJ): $(TEST_RUNNER) | $(DIRS)
-	@echo "CC $<"
-	@$(CC) $(CFLAGS) $(TEST_INCLUDE) $< -o $@
-
-$(TEST_RUNNER_DEP): $(TEST_RUNNER) | $(DIRS)
-	@echo "MKDEP $<"
-	@$(MKDEP) $(TEST_INCLUDE) $< -MQ $(BUILDDIR)/tests/$*.o -MQ $@ -MF $@
+	@echo "CC $< [DEBUG]"
+	@$(CC) $(DEBUG_CFLAGS) $(TEST_INCLUDE) $< -o $(TEST_RUNNER_OBJ) \
+		-MMD -MQ $(TEST_RUNNER_OBJ) -MQ $(TEST_RUNNER_DEP) -MF $(TEST_RUNNER_DEP)
 
 # Directory tree
 $(DIRS):
 	@mkdir -p $@
 
-# Include dependency information, but only if relevant
-ifeq ($(findstring clean,$(MAKECMDGOALS)),)
--include $(DEP)
-endif
-
-ifneq ($(findstring test,$(MAKECMDGOALS)),)
--include $(TEST_DEP) $(TEST_RUNNER_DEP)
-endif
+# Include dependency information
+-include $(ALL_DEP)

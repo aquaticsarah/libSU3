@@ -1,2 +1,2 @@
-libSU3.a
+libSU3*.a
 run-tests

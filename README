@@ -63,3 +63,7 @@ as source. However, any executables using this library must also be linked
 against GMP (use the linker options -lgmpxx -lgmp, in that order). This also
 means that these executables must be distributed in accordance with the GNU
 LGPL in addition to the terms of this library's license.
+
+Further, if using the profiling version of this library (libSU3-prof.a),
+you will probably want to also link against a profiling version of GMP
+in order to get better results - most of the actual work is done inside GMP.
