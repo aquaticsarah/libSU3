@@ -41,8 +41,11 @@ INCLUDE := -I include/
 LIB_INCLUDE := $(INCLUDE) -I src/
 TEST_INCLUDE := $(INCLUDE) -I tests/
 
+# External libraries to link against
+LIBRARIES := -lgmpxx -lgmp
+
 LD := g++
-LDFLAGS := -ggdb -lgmpxx -lgmp
+LDFLAGS := -ggdb
 
 MKDEP := g++ -MM -MP
 
@@ -69,7 +72,7 @@ libSU3.a: $(OBJ)
 # Intermediate targets
 run-tests: $(TEST_OBJ) $(TEST_RUNNER_OBJ) libSU3.a
 	@echo "Linking test driver"
-	@$(LD) $(LDFLAGS) $(TEST_OBJ) $(TEST_RUNNER_OBJ) libSU3.a -o $@
+	@$(LD) $(LDFLAGS) $(TEST_OBJ) $(TEST_RUNNER_OBJ) libSU3.a $(LIBRARIES) -o $@
 
 # Rules to build object files and dependency information
 $(OBJ):$(BUILDDIR)/%.o: src/%.cc | $(DIRS)
