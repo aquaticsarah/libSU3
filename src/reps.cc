@@ -11,7 +11,7 @@ long dimension(long p, long q)
     return (p+1)*(q+1)*(p+q+2)/2;
 }
 
-/* Display the name of a representation.
+/* Get the name of a representation.
     TODO: Deal with primed reps */
 char* repname(char* buffer, size_t len, long p, long q)
 {

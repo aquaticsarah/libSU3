@@ -47,7 +47,7 @@ sqrat isoarray::operator()(long n, long k, long l, long k1, long l1,
     return isf_array[index];
 }
 
-/* Convert to Clebsch-Gordans */
+/* Convert to Clebsch-Gordans. This returns a newly-allocated cgarray object. */
 cgarray* isoarray::to_cgarray()
 {
     /* Create a new coefficient array, to be owned by the cgarray we will
@@ -59,7 +59,6 @@ cgarray* isoarray::to_cgarray()
     for (i = 0; i < size; ++i)
         new_isf_array[i] = isf_array[i];
 
-    cgarray* cg = new cgarray(p, q, p1, q1, p2, q2, d, new_isf_array);
-
-    return cg;
+    isoarray* isf = new isoarray(p, q, p1, q1, p2, q2, d, new_isf_array);
+    return new cgarray(isf);
 }

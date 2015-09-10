@@ -114,17 +114,20 @@ class cgarray;
 /* A class to hold the isoscalar factors for a particular coupling */
 class isoarray
 {
+    friend class cgarray;
+    
 private:
+    isoarray* isf;
     size_t size; // Size of the following array
     const sqrat* isf_array;
 
-public:
     /* Target and factor reps */
     const long p, q, p1, q1, p2, q2;
 
     /* Degeneracy of target rep */
     const long d;
 
+public:
     /* Note: This type takes ownership of the array passed in - that is, it will
         delete the array when the isoarray object is deleted. */
     isoarray(long p, long q, long p1, long q1, long p2, long q2, long d,
@@ -136,7 +139,7 @@ public:
     sqrat operator()(long n, long k, long l, long k1, long l1,
                         long k2, long l2);
 
-    /* Convert to Clebsch-Gordans */
+    /* Convert to Clebsch-Gordans. This returns a newly-allocated cgarray object. */
     cgarray* to_cgarray();
 };
 
@@ -144,21 +147,11 @@ public:
 class cgarray
 {
 private:
-    /* Store the isoscalar factors for this coupling */
-    size_t size; // Size of the following array
-    const sqrat* isf_array;
+    isoarray* isf;
 
 public:
-    /* Target and factor reps */
-    const long p, q, p1, q1, p2, q2;
-
-    /* Degeneracy of target rep */
-    const long d;
-
-    /* Note: This type takes ownership of the array passed in - that is, it will
-        delete the array when the isoarray object is deleted. */
-    cgarray(long p, long q, long p1, long q1, long p2, long q2, long d,
-                sqrat* isf_array);
+    /* Note: This type takes ownership of the isoarray object passed in */
+    cgarray(isoarray* isf);
     ~cgarray();
 
     /* We use operator() instead of operator[] as an easy way to use
@@ -167,20 +160,27 @@ public:
                         long k1, long l1, long m1,
                         long k2, long l2, long m2);
 
-    /* Convert to ISFs */
+    /* Convert to ISFs. This returns a newly-allocated isoarray object. */
     isoarray* to_isoarray();
 };
 
-/* Information about representations */
+/* Calculate the dimension of one irrep */
 long dimension(long p, long q);
+
+/* Get the name of a representation. */
 char* repname(char* buffer, size_t len, long p, long q);
+
+/* Calculate the degeneracy of the (p,q) irrep in the decomposition of
+   (p1,q1) x (p2,q2). Returns 0 if (p,q) is not a summand in this
+   decomposition.
+*/
 long degeneracy(long p, long q, long p1, long q1, long p2, long q2);
 
 /* Calculate a single SU(2) Clebsch-Gordan coefficient */
 sqrat su2_cgc(mpq_class I, mpq_class Iz, mpq_class i1, mpq_class i1z,
                 mpq_class i2, mpq_class i2z);
 
-/* Main calculation functions */
+/* Main calculation functions. */
 isoarray* isoscalars(long p, long q, long p1, long q1, long p2, long q2);
 cgarray* clebsch_gordans(long p, long q, long p1, long q1, long p2, long q2);
 

@@ -33,65 +33,27 @@ TEST(3x3bar)
     delete isf;
 }
 
-void print_isoscalars(long p, long q, long p1, long q1, long p2, long q2)
+/* A family of tests designed to exercise the code which calculates the ISFs
+    for one rep by using the symmetry relations, rather than directly.
+    TODO: These tests should pass iff the calculation function doesn't
+    throw an exception.
+*/
+TEST(symmetries)
 {
-    long d = degeneracy(p, q, p1, q1, p2, q2);
-    if (d == 0) return;
-
-    isoarray* isf = isoscalars(p, q, p1, q1, p2, q2);
-
-    long n, k, l, k1, l1, k2, l2;
-    char buf[64];
-
-    printf("Isoscalar coefficients for (%ld,%ld): (%ld,%ld) x (%ld,%ld)\n",
-        p, q, p1, q1, p2, q2);
-    for (n = 0; n < d; ++n)
-    {
-        printf("Degenerate rep %ld:\n", n);
-
-        for (k = q; k <= p+q; ++k)
-            for (l = 0; l <= q; ++l)
-                for (k1 = q1; k1 <= p1+q1; ++k1)
-                    for (l1 = 0; l1 <= q1; ++l1)
-                        for (k2 = q2; k2 <= p2+q2; ++k2)
-                        {
-                            l2 = (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3 - (k1 + l1 + k2 - k - l);
-                            if ((l2 < 0) || (l2 > q2)) continue;
-
-                            sqrat val = (*isf)(n, k, l, k1, l1, k2, l2);
-                            val.tostring(buf, 64);
-                            printf("    (%ld,%ld) : (%ld,%ld) x (%ld,%ld) = %s\n",
-                                k, l, k1, l1, k2, l2, buf);
-                        }
-        printf("\n");
-    }
-
-    delete isf;
-}
-
-TEST(isoscalars)
-{
-#if 0
-    long p1, q1, p2, q2, p, q;
     isoarray* isf;
-    /* Check that our recurrence relations work (ie, don't crash)
-        for a range of different sets of reps */
-    for (p1 = 0; p1 < 5; ++p1)
-        for (q1 = 0; q1 < 5; ++q1)
-            for (p2 = 0; p2 < 5; ++p2)
-                for (q2 = 0; q2 < 5; ++q2)
-                    for (p = 0; p < 5; ++p)
-                        for (q = 0; q < 5; ++q)
-                        {
-                            isf = isoscalars(p1,q1,p2,q2,p,q);
-                            delete isf;
-                        }
-    fprintf(stderr, "Isoscalar calculations okay\n");
-#else
-    print_isoscalars(2,2,1,1,1,1);
-    print_isoscalars(1,1,2,2,1,1);
-    print_isoscalars(1,1,1,1,2,2);
 
-    fprintf(stderr, "Isoscalar calculations okay\n");
-#endif
+    /* Can be calculated directly */
+    isf = isoscalars(2, 3, 1, 2, 1, 1);
+    DO_TEST(isf != NULL, "Empty irrep");
+    delete isf;
+
+    /* Needs to use the 1<->3bar symmetry */
+    isf = isoscalars(1, 1, 3, 2, 1, 2);
+    DO_TEST(isf != NULL, "Empty irrep");
+    delete isf;
+
+    /* Needs to use the 2<->3bar symmetry */
+    isf = isoscalars(1, 1, 1, 2, 3, 2);
+    DO_TEST(isf != NULL, "Empty irrep");
+    delete isf;
 }
