@@ -26,10 +26,12 @@ sqrat cgarray::operator()(long n, long k, long l, long m,
     assert((m1 >= l1) && (m1 <= k1));
     assert((m2 >= l2) && (m2 <= k2));
 
-    mpq_class I  = mpq_class(k -l , 2), Iz  = mpq_class(m -l , 1) - I;
-    mpq_class i1 = mpq_class(k1-l1, 2), i1z = mpq_class(m1-l1, 1) - i1;
-    mpq_class i2 = mpq_class(k2-l2, 2), i2z = mpq_class(m2-l2, 1) - i2;
-    sqrat su2_cg = su2_cgc(I, Iz, i1, i1z, i2, i2z);
+    /* Calculate isospin values. Note that these are all implicitly doubled. */
+    long I = k -l , Iz  = 2*(m -l ) - I,
+        i1 = k1-l1, i1z = 2*(m1-l1) - i1,
+        i2 = k2-l2, i2z = 2*(m2-l2) - i2;
+
+    sqrat su2_cg = su2_cgc_2i(I, Iz, i1, i1z, i2, i2z);
 
     return (*isf)(n, k, l, k1, l1, k2, l2) * su2_cg;
 }

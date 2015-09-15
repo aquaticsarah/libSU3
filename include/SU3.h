@@ -176,7 +176,17 @@ char* repname(char* buffer, size_t len, long p, long q);
 */
 long degeneracy(long p, long q, long p1, long q1, long p2, long q2);
 
-/* Calculate a single SU(2) Clebsch-Gordan coefficient */
+/* Calculate a single SU(2) Clebsch-Gordan coefficient.
+    All arguments are implicitly doubled - eg, I represents
+    2*(the actual isospin).
+*/
+sqrat su2_cgc_2i(long I, long Iz, long i1, long i1z,
+                    long i2, long i2z);
+
+/* Calculate a single SU(2) Clebsch-Gordan coefficient.
+    This does *not* take doubled isospins, but instead takes GMP fractions,
+    so that half-integer values can be represented.
+*/
 sqrat su2_cgc(mpq_class I, mpq_class Iz, mpq_class i1, mpq_class i1z,
                 mpq_class i2, mpq_class i2z);
 
