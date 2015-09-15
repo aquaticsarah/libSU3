@@ -1,2 +1,3 @@
 libSU3*.a
 run-tests
+run-bench

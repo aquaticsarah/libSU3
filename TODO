@@ -7,4 +7,3 @@ are written in inline comments starting with "TODO:".
 
 * Calculate when we can use the various recursion relations, instead of
 trying them all every time
-* Benchmarks?
