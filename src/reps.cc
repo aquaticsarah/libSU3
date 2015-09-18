@@ -56,3 +56,32 @@ long degeneracy(long p, long q, long p1, long q1, long p2, long q2)
     assert(! (eta % 3));
     return eta/3;
 }
+
+/* Phase changes under the 1<->2 symmetry and the conjugation symmetry */
+long phase_exch_12(long p, long q, long p1, long q1, long p2, long q2)
+{
+    long gamma = (p1 + p2 - p);
+    long sigma = (q1 + q2 - q);
+
+    /* Note: The phase as given in Williams, converted to our variables, is
+        (-1)^(gamma/3 + sigma/3 + max(gamma/3, sigma/3)),
+        where the exponent is guaranteed to be an integer. Hence we can multiply
+        it by 3 to get an equivalent phase of:
+        (-1)^(gamma + sigma + max(gamma, sigma))
+     == (-1)^(2*max(gamma, sigma) + min(gamma, sigma))
+     == (-1)^min(gamma, sigma)
+    */
+    return SIGN(min(gamma, sigma));
+}
+
+long phase_conj(long p, long q, long p1, long q1, long p2, long q2)
+{
+    long gamma = (p1 + p2 - p);
+    long sigma = (q1 + q2 - q);
+
+    /* Note: Williams' expression for this phase is the same as above,
+        except with max replaced by min. A similar argument simplifies
+        it to (-1)^max(gamma, sigma)
+    */
+    return SIGN(max(gamma, sigma));
+}

@@ -239,9 +239,7 @@ isoarray* isoscalars(long p, long q, long p1, long q1, long p2, long q2)
     if (alt_ctx->calc_isoscalars())
     {
         /* For this case, we need to calculate an overall phase factor */
-        long x = p1 + p2 - p;
-        long y = q1 + q2 - q;
-        long xi_1 = SIGN(x + y + max(x, y));
+        long xi_1 = phase_exch_12(p, q, p1, q1, p2, q2);
 
         /* Use the symmetry relations to fill out the isoscalar factors for
            the reps we wanted originally */

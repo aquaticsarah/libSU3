@@ -176,6 +176,12 @@ char* repname(char* buffer, size_t len, long p, long q);
 */
 long degeneracy(long p, long q, long p1, long q1, long p2, long q2);
 
+/* Phase changes under the 1<->2 symmetry and the conjugation symmetry.
+    Note: Kaeding and Williams call these phases xi_1 and xi_3 respectively.
+*/
+long phase_exch_12(long p, long q, long p1, long q1, long p2, long q2);
+long phase_conj(long p, long q, long p1, long q1, long p2, long q2);
+
 /* Calculate a single SU(2) Clebsch-Gordan coefficient.
     All arguments are implicitly doubled - eg, I represents
     2*(the actual isospin).
