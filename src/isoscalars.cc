@@ -170,109 +170,68 @@ int isoscalar_context::calc_isoscalars()
     return 1;
 }
 
+/* Internal: Calculate values for one irrep combination, without trying
+    the symmetry relations */
+isoarray* isoscalars_single(long p, long q, long p1, long q1,
+                                    long p2, long q2, long d)
+{
+    size_t size = d * (p+1) * (q+1) * (p1+1) * (q1+1) * (p2+1);
+    sqrat* coefficients = new sqrat[size];
+    isoscalar_context* ctx = new isoscalar_context(p, q, p1, q1, p2, q2,
+                                                    d, coefficients);
+
+    isoarray* isf = new isoarray(p, q, p1, q1, p2, q2, d, coefficients);
+
+    /* Try to calculate; if we fail, just return NULL */
+    if (ctx->calc_isoscalars())
+    {
+        delete ctx;
+        return isf;
+    }
+    else
+    {
+        delete ctx;
+        delete isf;
+        return NULL;
+    }
+}
+
 /* Main calculation function */
 isoarray* isoscalars(long p, long q, long p1, long q1, long p2, long q2)
 {
     long d = degeneracy(p, q, p1, q1, p2, q2);
     if (! d) return NULL; /* Ignore reps of zero degeneracy */
 
-    size_t size = d * (p+1) * (q+1) * (p1+1) * (q1+1) * (p2+1);
-    sqrat* coefficients = new sqrat[size];
-    isoscalar_context* ctx = new isoscalar_context(p, q, p1, q1, p2, q2,
-                                                    d, coefficients);
+    isoarray* isf = isoscalars_single(p, q, p1, q1, p2, q2, d);
 
-    /* This is what we will return */
-    isoarray* res = new isoarray(p, q, p1, q1, p2, q2, d, coefficients);
-
-    if (ctx->calc_isoscalars())
-    {
-        delete ctx;
-        return res;
-    }
+    if (isf) return isf;
 
     /* If the direct algorithm fails, we try using the 1 <-> 3bar symmetry.
         This relates the isoscalar factors for r1 x r2 -> R to those for
         Rbar x r2 -> r1bar.
     */
-    size_t alt_size = d * (q1+1) * (p1+1) * (q+1) * (p+1) * (p2+1);
-    sqrat* alt_coefficients = new sqrat[alt_size];
-    isoscalar_context* alt_ctx = new isoscalar_context(q1, p1, q, p, p2, q2,
-                                                        d, alt_coefficients);
+    isf = isoscalars_single(q1, p1, q, p, p2, q2, d);
 
-    if (alt_ctx->calc_isoscalars())
+    if (isf)
     {
-        /* Use the symmetry relations to fill out the isoscalar factors for
-           the reps we wanted originally */
-        long n, k, l, k1, l1, k2, l2;
-        for (n = 0; n < d; ++n)
-            for (k = q; k <= p+q; ++k)
-                for (l = 0; l <= q; ++l)
-                    for (k1 = q1; k1 <= p1+q1; ++k1)
-                        for (l1 = 0; l1 <= q1; ++l1)
-                            for (k2 = q2; k2 <= p2+q2; ++k2)
-                            {
-                                l2 = (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3 - (k1 + l1 + k2 - k - l);
-                                if ((l2 < 0) || (l2 > q2)) continue;
-
-                                ctx->set_isf(n, k, l, k1, l1, k2, l2,
-                                    SIGN(l2)
-                                  * sqrat((p+1)*(q+1)*(p+q+2)*(k1-l1+1), (p1+1)*(q1+1)*(p1+q1+2)*(k-l+1))
-                                  * alt_ctx->isf(n, p1+q1-l1, p1+q1-k1, p+q-l, p+q-k, k2, l2));
-                            }
-
-        delete alt_ctx;
-        delete[] alt_coefficients;
-        delete ctx;
-        return res;
+        isoarray* new_isf = isf->exch_13bar();
+        delete isf;
+        return new_isf;
     }
 
     /* If that fails, combine with the r1 <-> r2 exchange symmetry.
         This results in a relation between the isfs for r1 x r2 -> R
         and those for Rbar x r1 -> r2bar */
-    delete alt_ctx;
-    delete[] alt_coefficients;
+    isf = isoscalars_single(q2, p2, p1, q1, q, p, d);
 
-    alt_size = d * (q2+1) * (p2+1) * (q+1) * (p+1) * (p1+1);
-    alt_coefficients = new sqrat[alt_size];
-    alt_ctx = new isoscalar_context(q2, p2, q, p, p1, q1, d, alt_coefficients);
-
-    if (alt_ctx->calc_isoscalars())
+    if (isf)
     {
-        /* For this case, we need to calculate an overall phase factor */
-        long xi_1 = phase_exch_12(p, q, p1, q1, p2, q2);
-
-        /* Use the symmetry relations to fill out the isoscalar factors for
-           the reps we wanted originally */
-        long n, k, l, k1, l1, k2, l2;
-        for (n = 0; n < d; ++n)
-            for (k = q; k <= p+q; ++k)
-                for (l = 0; l <= q; ++l)
-                    for (k1 = q1; k1 <= p1+q1; ++k1)
-                        for (l1 = 0; l1 <= q1; ++l1)
-                            for (k2 = q2; k2 <= p2+q2; ++k2)
-                            {
-                                l2 = (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3 - (k1 + l1 + k2 - k - l);
-                                if ((l2 < 0) || (l2 > q2)) continue;
-
-                                ctx->set_isf(n, k, l, k1, l1, k2, l2,
-                                    xi_1
-                                  * SIGN((k1 - l1 + k2 - l2 - k + l)/2)
-                                  * SIGN(l1)
-                                  * sqrat((p+1)*(q+1)*(p+q+2)*(k2-l2+1), (p2+1)*(q2+1)*(p2+q2+2)*(k-l+1))
-                                  * alt_ctx->isf(n, p2+q2-l2, p2+q2-k2, p+q-l, p+q-k, k1, l1));
-                            }
-
-        delete alt_ctx;
-        delete[] alt_coefficients;
-        delete ctx;
-        return res;
+        isoarray* new_isf = isf->exch_23bar();
+        delete isf;
+        return new_isf;
     }
 
     /* If we get here, nothing has worked, so throw an error */
-    delete alt_ctx;
-    delete[] alt_coefficients;
-    delete ctx;
-    delete res; // Also deletes 'coefficients'
     throw std::logic_error("Calculation of ISFs failed");
 }
 

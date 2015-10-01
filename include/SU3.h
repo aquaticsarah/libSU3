@@ -119,7 +119,10 @@ class isoarray
 private:
     isoarray* isf;
     size_t size; // Size of the following array
-    const sqrat* isf_array;
+    sqrat* isf_array;
+
+    void set_isf(long n, long k, long l, long k1, long l1,
+                    long k2, long l2, sqrat v);
 
     /* Target and factor reps */
     const long p, q, p1, q1, p2, q2;
@@ -141,6 +144,11 @@ public:
 
     /* Convert to Clebsch-Gordans. This returns a newly-allocated cgarray object. */
     cgarray* to_cgarray();
+
+    /* Apply the various symmetry relations */
+    isoarray* exch_12();
+    isoarray* exch_13bar();
+    isoarray* exch_23bar();
 };
 
 /* A class to hold the Clebsch-Gordan coefficients for a particular coupling */
@@ -162,6 +170,11 @@ public:
 
     /* Convert to ISFs. This returns a newly-allocated isoarray object. */
     isoarray* to_isoarray();
+
+    /* Apply the various symmetry relations */
+    cgarray* exch_12();
+    cgarray* exch_13bar();
+    cgarray* exch_23bar();
 };
 
 /* Calculate the dimension of one irrep */

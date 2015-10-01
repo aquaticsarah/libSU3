@@ -51,3 +51,19 @@ isoarray* cgarray::to_isoarray()
     return new isoarray(isf->p, isf->q, isf->p1, isf->q1,
                             isf->p2, isf->q2, isf->d, new_isf_array);
 }
+
+/* Apply the various symmetry relations */
+cgarray* cgarray::exch_12()
+{
+    return new cgarray(isf->exch_12());
+}
+
+cgarray* cgarray::exch_13bar()
+{
+    return new cgarray(isf->exch_13bar());
+}
+
+cgarray* cgarray::exch_23bar()
+{
+    return new cgarray(isf->exch_23bar());
+}

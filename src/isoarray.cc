@@ -20,6 +20,30 @@ isoarray::~isoarray()
     delete[] isf_array;
 }
 
+void isoarray::set_isf(long n, long k, long l, long k1, long l1,
+                        long k2, long l2, sqrat v)
+{
+    /* Bounds checks */
+    assert((n >= 0) && (n < d));
+    assert((k >= q) && (k <= p+q));
+    assert((l >= 0) && (l <= q));
+    assert((k1 >= q1) && (k1 <= p1+q1));
+    assert((l1 >= 0) && (l1 <= q1));
+    assert((k2 >= q2) && (k2 <= p2+q2));
+    assert((l2 >= 0) && (l2 <= q2));
+
+    /* Check hypercharge conservation */
+    assert(k1+l1+k2+l2-k-l == (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3);
+
+    /* If compiled with -DNDEBUG, this line is to remove a compiler warning
+        about l2 being unused */
+    (void)l2;
+
+    size_t index = ((((n * (p+1) + k-q) * (q+1) + l) * (p1+1) + k1-q1)
+                    * (q1+1) + l1) * (p2+1) + k2-q2;
+    isf_array[index] = v;
+}
+
 /* We use operator() instead of operator[] as an easy way to use
     multiple indices */
 sqrat isoarray::operator()(long n, long k, long l, long k1, long l1,
@@ -61,4 +85,93 @@ cgarray* isoarray::to_cgarray()
 
     isoarray* isf = new isoarray(p, q, p1, q1, p2, q2, d, new_isf_array);
     return new cgarray(isf);
+}
+
+/* Apply the various symmetry relations */
+isoarray* isoarray::exch_12()
+{
+    size_t new_size = (p+1)*(q+1)+(p2+1)*(q2+1)*(p1+1);
+    sqrat* new_isf_array = new sqrat[new_size];
+    isoarray* array = new isoarray(p, q, p2, q2, p1, q1, d, new_isf_array);
+
+    /* Fill the new array */
+    long xi_1 = phase_exch_12(p, q, p1, q1, p2, q2);
+    long n, k, l, k1, l1, k2, l2;
+
+    for (n = 0; n < d; ++n)
+        for (k = q; k <= p+q; ++k)
+            for (l = 0; l <= q; ++l)
+                for (k1 = q1; k1 <= p1+q1; ++k1)
+                    for (l1 = 0; l1 <= q1; ++l1)
+                        for (k2 = q2; k2 <= p2+q2; ++k2)
+                        {
+                            l2 = (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3 - (k1 + l1 + k2 - k - l);
+                            if ((l2 < 0) || (l2 > q2)) continue;
+
+                            array->set_isf(n, k, l, k2, l2, k1, l1,
+                                SIGN((k-l-k1+l1-k2+l2)/2) * xi_1
+                                * (*this)(n, k, l, k1, l1, k2, l2));
+                        }
+
+    return array;
+}
+
+isoarray* isoarray::exch_13bar()
+{
+    /* For this symmetry, the array size is unchanged */
+    sqrat* new_isf_array = new sqrat[size];
+    isoarray* array = new isoarray(q1, p1, q, p, p2, q2, d, new_isf_array);
+
+    /* Fill the new array */
+    long n, k, l, k1, l1, k2, l2;
+
+    for (n = 0; n < d; ++n)
+        for (k = q; k <= p+q; ++k)
+            for (l = 0; l <= q; ++l)
+                for (k1 = q1; k1 <= p1+q1; ++k1)
+                    for (l1 = 0; l1 <= q1; ++l1)
+                        for (k2 = q2; k2 <= p2+q2; ++k2)
+                        {
+                            l2 = (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3 - (k1 + l1 + k2 - k - l);
+                            if ((l2 < 0) || (l2 > q2)) continue;
+
+                            array->set_isf(n, p1+q1-l1, p1+q1-k1, p+q-l, p+q-k, k2, l2,
+                                    SIGN(l2)
+                                  * sqrat((p1+1)*(q1+1)*(p1+q1+2)*(k-l+1), (p+1)*(q+1)*(p+q+2)*(k1-l1+1))
+                                  * (*this)(n, k, l, k1, l1, k2, l2));
+                        }
+
+    return array;
+}
+
+/* Combination of the above two, for simplicity */
+isoarray* isoarray::exch_23bar()
+{
+    size_t new_size = (q2+1)*(p2+1)*(p1+1)*(q1+1)*(q+1);
+    sqrat* new_isf_array = new sqrat[new_size];
+    isoarray* array = new isoarray(q2, p2, p1, q1, q, p, d, new_isf_array);
+
+    /* Fill the new array */
+    long xi_1 = phase_exch_12(p, q, p1, q1, p2, q2);
+    long n, k, l, k1, l1, k2, l2;
+
+    for (n = 0; n < d; ++n)
+        for (k = q; k <= p+q; ++k)
+            for (l = 0; l <= q; ++l)
+                for (k1 = q1; k1 <= p1+q1; ++k1)
+                    for (l1 = 0; l1 <= q1; ++l1)
+                        for (k2 = q2; k2 <= p2+q2; ++k2)
+                        {
+                            l2 = (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3 - (k1 + l1 + k2 - k - l);
+                            if ((l2 < 0) || (l2 > q2)) continue;
+
+                            array->set_isf(n, p2+q2-l2, p2+q2-k2, k1, l1, p+q-l, p+q-k,
+                                xi_1
+                              * SIGN((k1 - l1 + k2 - l2 - k + l)/2)
+                              * SIGN(l1)
+                              * sqrat((p2+1)*(q2+1)*(p2+q2+2)*(k-l+1), (p+1)*(q+1)*(p+q+2)*(k2-l2+1))
+                              * (*this)(n, k, l, k1, l1, k2, l2));
+                        }
+
+    return array;
 }

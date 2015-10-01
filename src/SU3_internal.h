@@ -103,8 +103,8 @@ private:
 
     /* Allow the top-level driver function to interact with
         objects of this class */
-    friend isoarray* isoscalars(long p, long q, long p1, long q1,
-                                long p2, long q2);
+    friend isoarray* isoscalars_single(long p, long q, long p1, long q1,
+                                        long p2, long q2, long d);
 };
 
 #endif
