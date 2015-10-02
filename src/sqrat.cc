@@ -9,8 +9,7 @@
 /* Helper: Calculate sign(x) * x^2 */
 static long sign_square(long x)
 {
-    if (x < 0) return -x*x;
-    else return x*x;
+    return x*abs(x);
 }
 
 /* Helper: Calculate the square root of an integer, which must be a square.
@@ -61,84 +60,48 @@ sqrat::sqrat(long i) : v(sign_square(i)) {}
 sqrat::sqrat() : v(0) {}
 
 /* Unary operators */
-sqrat sqrat::operator+()
+sqrat operator+(const sqrat& value)
 {
-    return sqrat(+v);
+    return sqrat(value.v);
 }
 
-sqrat sqrat::operator-()
+sqrat operator-(const sqrat& value)
 {
-    return sqrat(-v);
+    return sqrat(-value.v);
 }
 
 /* Arithmetic. Note that for multiplication by scalars,
    we need to square the other term because all our fractions are
    implicitly under a square root sign */
-sqrat sqrat::operator*(sqrat other)
+sqrat operator*(sqrat left, const sqrat& right)
 {
-    return sqrat(v * other.v);
+    left *= right;
+    return left;
 }
 
-sqrat sqrat::operator*(long other)
+sqrat& sqrat::operator*=(const sqrat& other)
 {
-    return *this * sqrat(other);
+    v *= other.v;
+    return *this;
 }
 
-sqrat* sqrat::operator*=(sqrat other)
+sqrat operator/(sqrat left, const sqrat& right)
 {
-    sqrat res = *this * other;
-    v = res.v;
-    return this;
+    left /= right;
+    return left;
 }
 
-sqrat* sqrat::operator*=(long other)
-{
-    sqrat res = *this * other;
-    v = res.v;
-    return this;
-}
-
-sqrat operator*(long left, sqrat right)
-{
-    return sqrat(left) * right;
-}
-
-
-
-sqrat sqrat::operator/(sqrat other)
+sqrat& sqrat::operator/=(const sqrat& other)
 {
     /* Special case: If dividing by 0, we need to raise an exception,
        instead of actually doing the division (which would cause a
-       SIGFPE, which we can't catch)
+       SIGFPE, which we can't catch easily)
     */
     if (other.v == 0)
         throw std::domain_error("sqrat: division by zero");
 
-    return sqrat(v / other.v);
-}
-
-sqrat sqrat::operator/(long other)
-{
-    return *this / sqrat(other);
-}
-
-sqrat* sqrat::operator/=(sqrat other)
-{
-    sqrat res = *this / other;
-    v = res.v;
-    return this;
-}
-
-sqrat* sqrat::operator/=(long other)
-{
-    sqrat res = *this / other;
-    v = res.v;
-    return this;
-}
-
-sqrat operator/(long left, sqrat right)
-{
-    return sqrat(left) / right;
+    v /= other.v;
+    return *this;
 }
 
 /* Addition and subtraction are a bit more complicated.
@@ -157,211 +120,101 @@ sqrat operator/(long left, sqrat right)
     We have a helper function to deal with these reduced cases, then the
     operator+ and operator- methods just need to deal with signs.
     The 'sign' argument chooses between + (if 1) and - (if 0) */
-static sqrat add_internal(sqrat left, sqrat right, int sign)
+static mpq_class add_internal(mpq_class v, mpq_class w, int sign)
 {
-    mpq_class v = left.v, w = right.v;
-
-    if (sign)       return sqrat(v + 2*sqrt(mpq_class(v*w)) + w);
-    else if (v < w) return sqrat(-v + 2*sqrt(mpq_class(v*w)) - w);
-    else            return sqrat(v - 2*sqrt(mpq_class(v*w)) + w);
+    if (sign)       return v + 2*sqrt(mpq_class(v*w)) + w;
+    else if (v < w) return -v + 2*sqrt(mpq_class(v*w)) - w;
+    else            return v - 2*sqrt(mpq_class(v*w)) + w;
 }
 
 /* Addition and subtraction */
-sqrat sqrat::operator+(sqrat other)
+sqrat operator+(sqrat left, const sqrat& right)
+{
+    left += right;
+    return left;
+}
+
+sqrat& sqrat::operator+=(const sqrat& other)
 {
     if (v >= 0)
     {
         if (other.v >= 0)
-            return add_internal(*this, other, 1);
+            v = add_internal(v, other.v, 1);
         else
-            return add_internal(*this, -other, 0);
+            v = add_internal(v, -other.v, 0);
     }
     else
     {
         if (other.v >= 0)
-            return -add_internal(-*this, other, 0);
+            v = -add_internal(-v, other.v, 0);
         else
-            return -add_internal(-*this, -other, 1);
+            v = -add_internal(-v, -other.v, 1);
     }
+
+    return *this;
 }
 
-sqrat sqrat::operator+(long other)
+sqrat operator-(sqrat left, const sqrat& right)
 {
-    return *this + sqrat(other);
+    left -= right;
+    return left;
 }
 
-sqrat* sqrat::operator+=(sqrat other)
-{
-    sqrat res = *this + other;
-    v = res.v;
-    return this;
-}
-
-sqrat* sqrat::operator+=(long other)
-{
-    sqrat res = *this + other;
-    v = res.v;
-    return this;
-}
-
-sqrat operator+(long left, sqrat right)
-{
-    return sqrat(left) + right;
-}
-
-
-
-sqrat sqrat::operator-(sqrat other)
+sqrat& sqrat::operator-=(const sqrat& other)
 {
     if (v >= 0)
     {
         if (other.v >= 0)
-            return add_internal(*this, other, 0);
+            v = add_internal(v, other.v, 0);
         else
-            return add_internal(*this, -other, 1);
+            v = add_internal(v, -other.v, 1);
     }
     else
     {
         if (other.v >= 0)
-            return -add_internal(-*this, other, 1);
+            v = -add_internal(-v, other.v, 1);
         else
-            return -add_internal(-*this, -other, 0);
+            v = -add_internal(-v, -other.v, 0);
     }
+
+    return *this;
 }
 
-sqrat sqrat::operator-(long other)
-{
-    return *this - sqrat(other);
-}
-
-sqrat* sqrat::operator-=(sqrat other)
-{
-    sqrat res = *this - other;
-    v = res.v;
-    return this;
-}
-
-sqrat* sqrat::operator-=(long other)
-{
-    sqrat res = *this - other;
-    v = res.v;
-    return this;
-}
-
-sqrat operator-(long left, sqrat right)
-{
-    return sqrat(left) - right;
-}
-
-
-
-sqrat sqrt(sqrat value)
+sqrat sqrt(const sqrat& value)
 {
     return sqrat(sqrt(value.v));
 }
 
 /* Comparisons */
-bool sqrat::operator<(sqrat other)
+bool operator<(const sqrat& left, const sqrat& right)
 {
-    return v < other.v;
+    return left.v < right.v;
 }
 
-bool sqrat::operator<(long other)
+bool operator<=(const sqrat& left, const sqrat& right)
 {
-    return *this < sqrat(other);
+    return left.v <= right.v;
 }
 
-bool operator<(long left, sqrat right)
+bool operator==(const sqrat& left, const sqrat& right)
 {
-    return sqrat(left) < right;
+    return left.v == right.v;
 }
 
-
-
-bool sqrat::operator<=(sqrat other)
+bool operator!=(const sqrat& left, const sqrat& right)
 {
-    return v <= other.v;
+    return left.v != right.v;
 }
 
-bool sqrat::operator<=(long other)
+bool operator>(const sqrat& left, const sqrat& right)
 {
-    return *this <= sqrat(other);
+    return left.v > right.v;
 }
 
-bool operator<=(long left, sqrat right)
+bool operator>=(const sqrat& left, const sqrat& right)
 {
-    return sqrat(left) <= right;
+    return left.v >= right.v;
 }
-
-
-
-bool sqrat::operator==(sqrat other)
-{
-    return v == other.v;
-}
-
-bool sqrat::operator==(long other)
-{
-    return *this == sqrat(other);
-}
-
-bool operator==(long left, sqrat right)
-{
-    return sqrat(left) == right;
-}
-
-
-
-bool sqrat::operator!=(sqrat other)
-{
-    return v != other.v;
-}
-
-bool sqrat::operator!=(long other)
-{
-    return *this != sqrat(other);
-}
-
-bool operator!=(long left, sqrat right)
-{
-    return sqrat(left) != right;
-}
-
-
-
-bool sqrat::operator>(sqrat other)
-{
-    return v > other.v;
-}
-
-bool sqrat::operator>(long other)
-{
-    return *this > sqrat(other);
-}
-
-bool operator>(long left, sqrat right)
-{
-    return sqrat(left) > right;
-}
-
-
-
-bool sqrat::operator>=(sqrat other)
-{
-    return v >= other.v;
-}
-
-bool sqrat::operator>=(long other)
-{
-    return *this >= sqrat(other);
-}
-
-bool operator>=(long left, sqrat right)
-{
-    return sqrat(left) >= right;
-}
-
-
 
 /* Conversions to various types */
 char* sqrat::tostring(char* buffer, size_t len)
@@ -376,7 +229,7 @@ char* sqrat::tostring(char* buffer, size_t len)
     return buffer;
 }
 
-double sqrat::todouble()
+sqrat::operator double()
 {
     return sqrt(v.get_d());
 }

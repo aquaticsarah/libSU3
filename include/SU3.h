@@ -11,78 +11,45 @@
 */
 class sqrat
 {
-public:
+private:
     mpq_class v;
 
+public:
     sqrat(mpq_class v);
     sqrat(long, long);
     sqrat(mpz_class, mpz_class);
     sqrat(long);
     sqrat();
 
+    /* In-place arithmetic */
+    sqrat& operator+=(const sqrat&);
+    sqrat& operator*=(const sqrat&);
+    sqrat& operator/=(const sqrat&);
+    sqrat& operator-=(const sqrat&);
+
     /* Arithmetic operations */
-    sqrat operator+();
-    sqrat operator-();
+    friend sqrat operator+(const sqrat&);
+    friend sqrat operator-(const sqrat&);
 
-    sqrat operator*(sqrat);
-    sqrat operator*(long);
-    sqrat* operator*=(sqrat);
-    sqrat* operator*=(long);
+    friend sqrat operator*(sqrat, const sqrat&);
+    friend sqrat operator/(sqrat, const sqrat&);
+    friend sqrat operator+(sqrat, const sqrat&);
+    friend sqrat operator-(sqrat, const sqrat&);
 
-    sqrat operator/(sqrat);
-    sqrat operator/(long);
-    sqrat* operator/=(sqrat);
-    sqrat* operator/=(long);
-
-    sqrat operator+(sqrat);
-    sqrat operator+(long);
-    sqrat* operator+=(sqrat);
-    sqrat* operator+=(long);
-
-    sqrat operator-(sqrat);
-    sqrat operator-(long);
-    sqrat* operator-=(sqrat);
-    sqrat* operator-=(long);
-
-    friend sqrat sqrt(sqrat);
+    friend sqrat sqrt(const sqrat&);
 
     /* Comparisons */
-    bool operator<(sqrat);
-    bool operator<(long);
-
-    bool operator<=(sqrat);
-    bool operator<=(long);
-
-    bool operator==(sqrat);
-    bool operator==(long);
-
-    bool operator!=(sqrat);
-    bool operator!=(long);
-
-    bool operator>(sqrat);
-    bool operator>(long);
-
-    bool operator>=(sqrat);
-    bool operator>=(long);
+    friend bool operator<(const sqrat&, const sqrat&);
+    friend bool operator<=(const sqrat&, const sqrat&);
+    friend bool operator==(const sqrat&, const sqrat&);
+    friend bool operator!=(const sqrat&, const sqrat&);
+    friend bool operator>(const sqrat&, const sqrat&);
+    friend bool operator>=(const sqrat&, const sqrat&);
 
     /* Conversions to various types */
     char* tostring(char*, size_t);
-    double todouble();
+    explicit operator double();
 };
-
-/* Reversed arithmetic operators */
-sqrat operator*(long, sqrat);
-sqrat operator/(long, sqrat);
-sqrat operator+(long, sqrat);
-sqrat operator-(long, sqrat);
-
-/* Reversed comparisons */
-bool operator<(long, sqrat);
-bool operator<=(long, sqrat);
-bool operator==(long, sqrat);
-bool operator!=(long, sqrat);
-bool operator>(long, sqrat);
-bool operator>=(long, sqrat);
 
 /* Classes to hold SU(3) isoscalar factors and Clebsch-Gordan coefficients.
 

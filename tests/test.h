@@ -34,7 +34,7 @@ extern int tests_passed;
     do \
     { \
         char _abuf[64], _pqbuf[64], _thingbuf[64]; \
-        a.tostring(_abuf, 64); \
+        (a).tostring(_abuf, 64); \
         sqrat _expected = sqrat(p, q); \
         _expected.tostring(_pqbuf, 64); \
         gmp_snprintf(_thingbuf, 64, thing, ## args); \
