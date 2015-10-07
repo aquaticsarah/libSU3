@@ -231,5 +231,12 @@ char* sqrat::tostring(char* buffer, size_t len)
 
 sqrat::operator double()
 {
-    return sqrt(v.get_d());
+    double x = v.get_d();
+
+    /* The value we want is sign(x) * sqrt(|x|),
+        so correct for that */
+    if (std::signbit(x))
+        return -sqrt(-x);
+    else
+        return sqrt(x);
 }

@@ -16,6 +16,20 @@ TEST(sqrat)
     TEST_EQ_SQRAT(a, -121, 1, "-11");
 }
 
+TEST(sqrat_to_double)
+{
+    sqrat a;
+    double b;
+
+    a = sqrat(2);
+    b = (double)a;
+    DO_TEST(b == 2.0, "Expected (double)sqrat(2) == 2, got %f", b);
+
+    a = sqrat(-3);
+    b = (double)a;
+    DO_TEST(b == -3.0, "Expected (double)(sqrat(-3)) == -3, got %f", b);
+}
+
 TEST(sqrat_arithmetic)
 {
     sqrat a(1, 4);
