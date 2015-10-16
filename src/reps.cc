@@ -11,18 +11,6 @@ long dimension(long p, long q)
     return (p+1)*(q+1)*(p+q+2)/2;
 }
 
-/* Get the name of a representation.
-    TODO: Deal with primed reps */
-char* repname(char* buffer, size_t len, long p, long q)
-{
-    long dim = dimension(p, q);
-    if (q > p)
-        snprintf(buffer, len, "%ld*", dim);
-    else
-        snprintf(buffer, len, "%ld", dim);
-    return buffer;
-}
-
 /* Calculate the degeneracy of the (p,q) irrep in the decomposition of
    (p1,q1) x (p2,q2). Returns 0 if (p,q) is not a summand in this
    decomposition.

@@ -147,9 +147,6 @@ public:
 /* Calculate the dimension of one irrep */
 long dimension(long p, long q);
 
-/* Get the name of a representation. */
-char* repname(char* buffer, size_t len, long p, long q);
-
 /* Calculate the degeneracy of the (p,q) irrep in the decomposition of
    (p1,q1) x (p2,q2). Returns 0 if (p,q) is not a summand in this
    decomposition.
