@@ -84,22 +84,38 @@ private:
     void step_l_up(long n, long k, long l, long k1, long l1, long k2, long l2);
 
     /* Step down from one plane (at s+2) to the next plane (at s).
-       Sometimes this can fail, in which case you need to conjugate all reps,
-       try again (this will always succeed in this case) and then use symmetries
-       to extract the original coupling coefficients.
-       The function returns 1 on sucess, 0 on failure.
+       In principle this can fail, in which case you need to use the exchange
+       symmetries in order to calculate the values. This should never happen with
+       this function, however, as isoscalars() has logic for deciding whether this
+       can happen *before* it picks which ISFs to calculate.
+
+       Note: When doing this, there are two independent choices we can make:
+
+       * We can try to calculate the value at (k1max,l1min) or at (k1min,l1max)
+         (these require different steps afterwards)
+
+       * We can try recursion relation A or recursion relation B
+         (these require the same steps afterwards)
+
+       Each of the four combinations works in different cases, so we intelligently
+       choose between them.
+
+       Internally, we use the step_k1_up/down and step_l1_up/down functions,
+       but we step "from" a non-existent state (with k1,l1 not in the valid range)
+       to the state we want. This works because 'isoscalar_array' allows us to
+       request (certain) non-existent states and just returns 0 for the coupling
+       coefficient. This is exactly what we need for the stepping to work properly.
     */
-    int step_s_down(long n, long s, long k1min, long k1max,
-                    long l1min, long l1max);
+    void step_s_down(long n, long s);
 
     /* Calculate the inner product of two sets of isoscalar factors */
     sqrat inner_product(long m, long n);
 
     /* Calculate couplings to the state of highest weight in each multiplet */
-    int calc_shw();
+    void calc_shw();
 
     /* Fill out each multiplet, assuming that the SHWs have been calculated */
-    int calc_isoscalars();
+    void calc_isoscalars();
 
     /* Allow the top-level driver function to interact with
         objects of this class */

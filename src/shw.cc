@@ -73,9 +73,10 @@ void isoscalar_context::step_l1_down(long n, long s, long k1, long l1)
 }
 
 /* Step down from one plane (at s+2) to the next plane (at s).
-   Sometimes this can fail, in which case you need to conjugate all reps,
-   try again (this will always succeed in this case) and then use symmetries
-   to extract the original coupling coefficients.
+   In principle this can fail, in which case you need to use the exchange
+   symmetries in order to calculate the values. This should never happen with
+   this function, however, as isoscalars() has logic for deciding whether this
+   can happen *before* it picks which ISFs to calculate.
 
    Note: When doing this, there are two independent choices we can make:
 
@@ -85,7 +86,8 @@ void isoscalar_context::step_l1_down(long n, long s, long k1, long l1)
    * We can try recursion relation A or recursion relation B
      (these require the same steps afterwards)
 
-   Each of these works in different cases, so we try all four combinations.
+   Each of the four combinations works in different cases, so we intelligently
+   choose between them.
 
    Internally, we use the step_k1_up/down and step_l1_up/down functions,
    but we step "from" a non-existent state (with k1,l1 not in the valid range)
@@ -93,54 +95,50 @@ void isoscalar_context::step_l1_down(long n, long s, long k1, long l1)
    request (certain) non-existent states and just returns 0 for the coupling
    coefficient. This is exactly what we need for the stepping to work properly.
 */
-int isoscalar_context::step_s_down(long n, long s,
-        long k1min, long k1max, long l1min, long l1max)
+void isoscalar_context::step_s_down(long n, long s)
 {
-    /* Try the four different possibilities */
-    try
-    {
+    /* Calculate unconstrained versions of the min/max values */
+    long k1min_u = (A + s)/2 - (p2+q2);
+    long k1max_u = (A + s)/2 - q2;
+    long l1min_u = (A - s)/2 - q2;
+    long l1max_u = (A - s)/2;
+
+    long k1min = max(q1, k1min_u);
+    long k1max = min(p1+q1, k1max_u);
+    long l1min = max(0, l1min_u);
+    long l1max = min(q1, l1max_u);
+
+    /* Each recursion relation has conditions for being valid. We test these here. */
+    if (k1min_u < q1)
         step_k1_up(n, s, k1min, l1max);
-    }
-    catch (std::domain_error& e)
+    else if (l1max_u > q1)
+        step_l1_down(n, s, k1min, l1max);
+    else
     {
-        try
-        {
-            step_l1_down(n, s, k1min, l1max);
-        }
-        catch (std::domain_error& e)
-        {
-            /* Stepping to (k1min, l1max) failed, so try (k1max, l1min) */
-            try
-            {
-                step_k1_down(n, s, k1max, l1min);
-            }
-            catch (std::domain_error& e)
-            {
-                try
-                {
-                    step_l1_up(n, s, k1max, l1min);
-                }
-                catch (std::domain_error& e)
-                {
-                    return 0;
-                }
-            }
+        /* Stepping to (k1min, l1max) failed, so try (k1max, l1min) */
+        if (k1max_u < p1+q1)
+            step_k1_down(n, s, k1max, l1min);
+        else if (l1min_u > 0)
+            step_l1_up(n, s, k1max, l1min);
+        else
+            throw std::logic_error("Couldn't use any recursion relations. "
+                                    "This should never happen!\n");
 
-            /* If we get here, we succeded at (k1max, l1min).
-                So fill out the rest of this plane from this point. */
-            long k1, l1;
+        /* If we get here, we succeded at (k1max, l1min).
+            So fill out the rest of this plane from this point. */
+        long k1, l1;
+        for (l1 = l1min+1; l1 <= l1max; ++l1)
+            step_l1_up(n, s, k1max, l1);
+
+        for (k1 = k1max-1; k1 >= k1min; --k1)
+        {
+            step_k1_down(n, s, k1, l1min);
             for (l1 = l1min+1; l1 <= l1max; ++l1)
-                step_l1_up(n, s, k1max, l1);
-
-            for (k1 = k1max-1; k1 >= k1min; --k1)
-            {
-                step_k1_down(n, s, k1, l1min);
-                for (l1 = l1min+1; l1 <= l1max; ++l1)
-                    step_l1_up(n, s, k1, l1);
-            }
-
-            return 1;
+                step_l1_up(n, s, k1, l1);
         }
+
+        /* Avoid falling through to the code below */
+        return;
     }
 
     /* If we get here, we succeded at (k1min, l1max).
@@ -155,8 +153,6 @@ int isoscalar_context::step_s_down(long n, long s,
         for (l1 = l1max-1; l1 >= l1min; --l1)
             step_l1_down(n, s, k1, l1);
     }
-
-    return 1;
 }
 
 /* Calculate the inner product of two sets of isoscalar factors */
@@ -184,7 +180,7 @@ sqrat isoscalar_context::inner_product(long m, long n)
 /* Calculate couplings to the state of highest weight.
     Returns 1 on success, 0 if we need to try again with
     the reps conjugated. */
-int isoscalar_context::calc_shw()
+void isoscalar_context::calc_shw()
 {
     long smax = min(A, (2*q1 + 2*q2 + 4*p1 + 4*p2 + q - p)/3);
     long smin = max(p + q, 2*q1 + 2*q2 - A);
@@ -229,23 +225,8 @@ int isoscalar_context::calc_shw()
     /* Now we have filled out the topmost d planes, step down
        through the rest of them */
     for (s = smax - 2*d; s >= smin; s -= 2)
-    {
-        k1min = max(q1, (A + s)/2 - (p2+q2));
-        k1max = min(p1+q1, (A + s)/2 - q2);
-        l1min = max(0, (A - s)/2 - q2);
-        l1max = min(q1, (A - s)/2);
-
         for (n = 0; n < d; ++n)
-        {
-            /* Try to step down, exiting if it fails */
-            if (! step_s_down(n, s, k1min, k1max, l1min, l1max))
-            {
-                /* If we get here, the stepdown algorithm failed, and we need to
-                   try again with the reps conjugated */
-                return 0;
-            }
-        }
-    }
+            step_s_down(n, s);
 
     /* Orthonormalise the ISFs for different representations.
        We orthogonalise each rep against *later* reps in order to get equivalent
@@ -313,6 +294,4 @@ int isoscalar_context::calc_shw()
                         isf(n, p+q, 0, k1, l1, k2, l2) / v);
                 }
     }
-
-    return 1;
 }

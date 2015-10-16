@@ -114,14 +114,13 @@ void isoscalar_context::step_l_up(long n, long k, long l, long k1,
 
 /* Internal function: Calculate the isoscalar factors for a particular
     combination of reps. */
-int isoscalar_context::calc_isoscalars()
+void isoscalar_context::calc_isoscalars()
 {
     /* Calculate couplings to the state of highest weight (k=p+q, l=0).
         This may fail, in which case we return to the top-level function
         which will try using symmetries to convert into a solvable problem.
     */
-    if (! this->calc_shw())
-        return 0;
+    this->calc_shw();
 
     /* Then fill in the rest of the couplings */
     long n, k, l, k1, l1, k2, l2;
@@ -166,8 +165,29 @@ int isoscalar_context::calc_isoscalars()
                         }
         }
     }
+}
 
-    return 1;
+/* Internal: Can we calculate the ISFs for a given set of reps directly? */
+static int can_calculate(long p, long q, long p1, long q1, long p2, long q2,
+                         long d)
+{
+    long A  = (2*p1 + 2*p2 + 4*q1 + 4*q2 + p - q)/3;
+    long Ar = (2*q1 + 2*q2 + 4*p1 + 4*p2 + q - p)/3;
+    long smax = min(A, Ar);
+    long smin = max(p + q, 2*q1 + 2*q2 - A);
+
+    /* The only way a calculation can fail is if the step down to s = smax-2*d fails.
+        This happens iff all of the following conditions fail. Each corresponds to
+        some reason the calculation at that level succeeds.
+    */
+    if (    (smax - 2*d < smin)                     // Nothing to calculate
+        || ((A + (smax - 2*d))/2 - (p2+q2) < q1)    // step_k1_up succeeds
+        || ((A - (smax - 2*d))/2 > q1)              // step_l1_down succeeds
+        || ((A + (smax - 2*d))/2 - q2 < p1+q1)      // step_k1_down succeeds
+        || ((A - (smax - 2*d))/2 - q2 > 0))         // step_l1_up succeeds
+            return 1;
+    else
+        return 0;
 }
 
 /* Internal: Calculate values for one irrep combination, without trying
@@ -175,25 +195,19 @@ int isoscalar_context::calc_isoscalars()
 isoarray* isoscalars_single(long p, long q, long p1, long q1,
                                     long p2, long q2, long d)
 {
+    /* Check that our calculations will succeed, before we do them */
+    if (! can_calculate(p, q, p1, q1, p2, q2, d))
+        return NULL;
+
     size_t size = d * (p+1) * (q+1) * (p1+1) * (q1+1) * (p2+1);
     sqrat* coefficients = new sqrat[size];
     isoscalar_context* ctx = new isoscalar_context(p, q, p1, q1, p2, q2,
                                                     d, coefficients);
-
     isoarray* isf = new isoarray(p, q, p1, q1, p2, q2, d, coefficients);
 
-    /* Try to calculate; if we fail, just return NULL */
-    if (ctx->calc_isoscalars())
-    {
-        delete ctx;
-        return isf;
-    }
-    else
-    {
-        delete ctx;
-        delete isf;
-        return NULL;
-    }
+    ctx->calc_isoscalars();
+    delete ctx;
+    return isf;
 }
 
 /* Main calculation function */
@@ -202,16 +216,16 @@ isoarray* isoscalars(long p, long q, long p1, long q1, long p2, long q2)
     long d = degeneracy(p, q, p1, q1, p2, q2);
     if (! d) return NULL; /* Ignore reps of zero degeneracy */
 
+    /* Try to calculate directly */
     isoarray* isf = isoscalars_single(p, q, p1, q1, p2, q2, d);
-
-    if (isf) return isf;
+    if (isf)
+        return isf;
 
     /* If the direct algorithm fails, we try using the 1 <-> 3bar symmetry.
         This relates the isoscalar factors for r1 x r2 -> R to those for
         Rbar x r2 -> r1bar.
     */
     isf = isoscalars_single(q1, p1, q, p, p2, q2, d);
-
     if (isf)
     {
         isoarray* new_isf = isf->exch_13bar();
@@ -223,7 +237,6 @@ isoarray* isoscalars(long p, long q, long p1, long q1, long p2, long q2)
         This results in a relation between the isfs for r1 x r2 -> R
         and those for Rbar x r1 -> r2bar */
     isf = isoscalars_single(q2, p2, p1, q1, q, p, d);
-
     if (isf)
     {
         isoarray* new_isf = isf->exch_23bar();
