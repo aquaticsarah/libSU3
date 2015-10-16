@@ -57,3 +57,24 @@ TEST(symmetries)
     DO_TEST(isf != NULL, "Empty irrep");
     delete isf;
 }
+
+/* Test only that there are no crashes, but for a large number
+   of representations */
+TEST(isoscalars_no_crashes)
+{
+    isoarray* isf;
+
+    long p, q, p1, q1, p2, q2;
+    for (p = 0; p < 5; ++p)
+        for (q = 0; q < 5; ++q)
+            for (p1 = 0; p1 < 5; ++p1)
+                for (q1 = 0; q1 < 5; ++q1)
+                    for (p2 = 0; p2 < 5; ++p2)
+                        for (q2 = 0; q2 < 5; ++q2)
+                        {
+                            isf = isoscalars(p, q, p1, q1, p2, q2);
+                            delete isf;
+                        }
+
+    DO_TEST(1, "Shouldn't happen");
+}

@@ -41,6 +41,7 @@ void isoarray::set_isf(long n, long k, long l, long k1, long l1,
 
     size_t index = ((((n * (p+1) + k-q) * (q+1) + l) * (p1+1) + k1-q1)
                     * (q1+1) + l1) * (p2+1) + k2-q2;
+    assert(index < size);
     isf_array[index] = v;
 }
 
@@ -147,7 +148,7 @@ isoarray* isoarray::exch_13bar()
 /* Combination of the above two, for simplicity */
 isoarray* isoarray::exch_23bar()
 {
-    size_t new_size = (q2+1)*(p2+1)*(p1+1)*(q1+1)*(q+1);
+    size_t new_size = d*(q2+1)*(p2+1)*(p1+1)*(q1+1)*(q+1);
     sqrat* new_isf_array = new sqrat[new_size];
     isoarray* array = new isoarray(q2, p2, p1, q1, q, p, d, new_isf_array);
 
