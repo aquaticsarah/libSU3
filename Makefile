@@ -16,7 +16,6 @@ test: run-tests
 	@./run-tests
 
 bench: run-bench
-	@echo "Running benchmark"
 	@./run-bench
 
 clean:

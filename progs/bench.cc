@@ -4,54 +4,43 @@
 
 #include "SU3.h"
 
-#define ITERS 50L
+#define ITERS 25L
 #define DELTA(start, end) ((end - start) / (double)CLOCKS_PER_SEC)
 
 int main()
 {
     clock_t start, end;
-    double overhead, raw, actual;
-
+    double elapsed;
     long i;
-    long d;
-    long n,k,l,m,k1,l1,m1,k2,l2,m2;
 
-    /* Time an empty loop, to estimate overhead */
-    printf("Timing overhead (%ld iterations)...\n", ITERS);
-
-    start = clock();
-    for (i = 0; i < ITERS; ++i)
-        asm volatile ("");
-    end = clock();
-    overhead = DELTA(start, end);
-
-    /* Benchmark the calculation of 27 x 27 -> 27 */
-    /* d = degeneracy * (p+1) * (q+1) * (p1+1) * (q1+1) * (p2+1)
-        (the q2 axis is ignored - due to hypercharge conservation, only one
-        value of l2 is valid for any given k,l,k1,l1,k2)
-    */
-    d = 3*3*3*3*3*3;
-    printf("Timing ISFs for 27x27->27 (%ld iterations, %ld ISFs)...\n", ITERS, d);
+    printf("Running benchmarks; all results are averages over %ld iterations.\n\n", ITERS);
+    printf("Timing calculations for small reps...\n");
 
     isoarray* isf;
+    long p, q, p1, q1, p2, q2;
     start = clock();
     for (i = 0; i < ITERS; ++i)
     {
-        isf = isoscalars(2, 2, 2, 2, 2, 2);
-        delete isf;
+        for (p = 0; p < 3; ++p)
+            for (q = 0; q < 3; ++q)
+                for (p1 = 0; p1 < 3; ++p1)
+                    for (q1 = 0; q1 < 3; ++q1)
+                        for (p2 = 0; p2 < 3; ++p2)
+                            for (q2 = 0; q2 < 3; ++q2)
+                            {
+                                isf = isoscalars(p, q, p1, q1, p2, q2);
+                                delete isf;
+                            }
     }
     end = clock();
-    raw = DELTA(start, end);
-    actual = raw - overhead;
+    elapsed = DELTA(start, end);
 
-    printf("Total time: %7.3fs = %7.3fms/iter\n", actual, actual*1000./ITERS);
-    printf("                     = %7.3fus/ISF\n\n", actual*1000000./(ITERS*d));
+    printf("Total time: %7.3fs = %7.3fms/iter\n\n", elapsed, elapsed*1000./ITERS);
 
-    /* Benchmark conversion from ISFs to CGCs */
+    printf("Timing ISF->CGC conversion for 27x27->27...\n");
+
     cgarray* cgc = clebsch_gordans(2, 2, 2, 2, 2, 2);
-    d = 3*(3*3*6/2)*(3*3*6/2)*(3*3*6/2);
-    printf("Timing ISF->CGC for 27x27->27 (%ld iterations, %ld CGCs)...\n", ITERS, d);
-
+    long n,k,l,m,k1,l1,m1,k2,l2,m2;
     start = clock();
     for (i = 0; i < ITERS; ++i)
     {
@@ -70,10 +59,8 @@ int main()
                                             }
     }
     end = clock();
-    raw = DELTA(start, end);
-    actual = raw - overhead;
+    elapsed = DELTA(start, end);
     delete cgc;
 
-    printf("Total time: %7.3fs = %7.3fms/iter\n", actual, actual*1000./ITERS);
-    printf("                     = %7.3fus/CGC\n\n", actual*1000000./(ITERS*d));
+    printf("Total time: %7.3fs = %7.3fms/iter\n", elapsed, elapsed*1000./ITERS);
 }
