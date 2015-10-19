@@ -23,6 +23,10 @@ static void fill_rows(long p, long q, long p1, long q1,
     */
     long n, k, l, m, k1, l1, m1, k2, l2, m2;
     for (n = 0; n < d; ++n)
+        /* We don't use FOREACH_CGC here, as we explicitly want to iterate over
+            *every* CGC, even the ones which definitely can't couple, so that we
+            fill out entire rows.
+        */
         for (k = q; k <= p+q; ++k)
             for (l = 0; l <= q; ++l)
                 for (m = l; m <= k; ++m)

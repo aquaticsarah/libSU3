@@ -45,18 +45,8 @@ int main()
     for (i = 0; i < ITERS; ++i)
     {
         for (n = 0; n < 2; ++n)
-            for (k = 2; k <= 4; ++k)
-                for (l = 0; l <= 2; ++l)
-                    for (m = l; m <= k; ++m)
-                        for (k1 = 2; k1 <= 4; ++k1)
-                            for (l1 = 0; l1 <= 2; ++l1)
-                                for (m1 = l1; m1 <= k1; ++m1)
-                                    for (k2 = 2; k2 <= 4; ++k2)
-                                        for (l2 = 0; l2 <= 2; ++l2)
-                                            for (m2 = l2; m2 <= k2; ++m2)
-                                            {
-                                                (*cgc)(n,k,l,m,k1,l1,m1,k2,l2,m2);
-                                            }
+            FOREACH_CGC(2, 2, 2, 2, 2, 2, k, l, m, k1, l1, m1, k2, l2, m2)
+                (*cgc)(n,k,l,m,k1,l1,m1,k2,l2,m2);
     }
     end = clock();
     elapsed = DELTA(start, end);

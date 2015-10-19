@@ -6,6 +6,36 @@
 #include <stddef.h>
 #include <gmpxx.h>
 
+/* Macros to iterate over the states of a given coupling. We guarantee that:
+    * All states produced are valid
+    * All of the states with nonzero coupling are produced
+    But we do *not* guarantee which states of zero coupling are produced,
+    or in what order.
+    Additionally, we do not iterate over degenerate representations.
+    Each argument is evaluated multiple times, and k*, l* are expected to
+    be simple variables.
+*/
+#define FOREACH_ISF(p, q, p1, q1, p2, q2, k, l, k1, l1, k2, l2) \
+    for (k = q; k <= p+q; ++k) \
+        for (l = 0; l <= q; ++l) \
+            for (k1 = q1; k1 <= p1+q1; ++k1) \
+                for (l1 = 0; l1 <= q1; ++l1) \
+                    for (k2 = q2; k2 <= p2+q2; ++k2) \
+                        if (/* Assign l2, then check it is in range */ \
+                            l2 = (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3 \
+                               - (k1 + l1 + k2 - k - l), \
+                            ((l2 >= 0) && (l2 <= q2)))
+
+#define FOREACH_CGC(p, q, p1, q1, p2, q2, k, l, m, k1, l1, m1, k2, l2, m2) \
+    FOREACH_ISF(p, q, p1, q1, p2, q2, k, l, k1, l1, k2, l2) \
+        if (((k-l-k1+l1-k2+l2) % 2) == 0) \
+            for (m = l; m <= k; ++m) \
+                for (m1 = l1; m1 <= k1; ++m1) \
+                    if (/* Assign m2, then check it is in range */ \
+                        m2 = m-l-m1+l1+l2-(k-l-k1+l1-k2+l2)/2, \
+                        ((m2 >= l2) && (m2 <= k2)))
+
+
 /* Class to represent (+ or -) the square root of a rational.
     The actual value represented is sign(v) * |v|
 */

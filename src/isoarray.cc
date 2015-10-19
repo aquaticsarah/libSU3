@@ -115,19 +115,10 @@ isoarray* isoarray::exch_12()
     long n, k, l, k1, l1, k2, l2;
 
     for (n = 0; n < d; ++n)
-        for (k = q; k <= p+q; ++k)
-            for (l = 0; l <= q; ++l)
-                for (k1 = q1; k1 <= p1+q1; ++k1)
-                    for (l1 = 0; l1 <= q1; ++l1)
-                        for (k2 = q2; k2 <= p2+q2; ++k2)
-                        {
-                            l2 = (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3 - (k1 + l1 + k2 - k - l);
-                            if ((l2 < 0) || (l2 > q2)) continue;
-
-                            array->set_isf(n, k, l, k2, l2, k1, l1,
-                                SIGN((k-l-k1+l1-k2+l2)/2) * xi_1
-                                * (*this)(n, k, l, k1, l1, k2, l2));
-                        }
+        FOREACH_ISF(p, q, p1, q1, p2, q2, k, l, k1, l1, k2, l2)
+            array->set_isf(n, k, l, k2, l2, k1, l1,
+                SIGN((k-l-k1+l1-k2+l2)/2) * xi_1
+                * (*this)(n, k, l, k1, l1, k2, l2));
 
     return array;
 }
@@ -142,20 +133,11 @@ isoarray* isoarray::exch_13bar()
     long n, k, l, k1, l1, k2, l2;
 
     for (n = 0; n < d; ++n)
-        for (k = q; k <= p+q; ++k)
-            for (l = 0; l <= q; ++l)
-                for (k1 = q1; k1 <= p1+q1; ++k1)
-                    for (l1 = 0; l1 <= q1; ++l1)
-                        for (k2 = q2; k2 <= p2+q2; ++k2)
-                        {
-                            l2 = (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3 - (k1 + l1 + k2 - k - l);
-                            if ((l2 < 0) || (l2 > q2)) continue;
-
-                            array->set_isf(n, p1+q1-l1, p1+q1-k1, p+q-l, p+q-k, k2, l2,
-                                    SIGN(l2)
-                                  * sqrat((p1+1)*(q1+1)*(p1+q1+2)*(k-l+1), (p+1)*(q+1)*(p+q+2)*(k1-l1+1))
-                                  * (*this)(n, k, l, k1, l1, k2, l2));
-                        }
+        FOREACH_ISF(p, q, p1, q1, p2, q2, k, l, k1, l1, k2, l2)
+            array->set_isf(n, p1+q1-l1, p1+q1-k1, p+q-l, p+q-k, k2, l2,
+                    SIGN(l2)
+                  * sqrat((p1+1)*(q1+1)*(p1+q1+2)*(k-l+1), (p+1)*(q+1)*(p+q+2)*(k1-l1+1))
+                  * (*this)(n, k, l, k1, l1, k2, l2));
 
     return array;
 }
@@ -172,22 +154,13 @@ isoarray* isoarray::exch_23bar()
     long n, k, l, k1, l1, k2, l2;
 
     for (n = 0; n < d; ++n)
-        for (k = q; k <= p+q; ++k)
-            for (l = 0; l <= q; ++l)
-                for (k1 = q1; k1 <= p1+q1; ++k1)
-                    for (l1 = 0; l1 <= q1; ++l1)
-                        for (k2 = q2; k2 <= p2+q2; ++k2)
-                        {
-                            l2 = (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3 - (k1 + l1 + k2 - k - l);
-                            if ((l2 < 0) || (l2 > q2)) continue;
-
-                            array->set_isf(n, p2+q2-l2, p2+q2-k2, k1, l1, p+q-l, p+q-k,
-                                xi_1
-                              * SIGN((k1 - l1 + k2 - l2 - k + l)/2)
-                              * SIGN(l1)
-                              * sqrat((p2+1)*(q2+1)*(p2+q2+2)*(k-l+1), (p+1)*(q+1)*(p+q+2)*(k2-l2+1))
-                              * (*this)(n, k, l, k1, l1, k2, l2));
-                        }
+        FOREACH_ISF(p, q, p1, q1, p2, q2, k, l, k1, l1, k2, l2)
+            array->set_isf(n, p2+q2-l2, p2+q2-k2, k1, l1, p+q-l, p+q-k,
+                xi_1
+              * SIGN((k1 - l1 + k2 - l2 - k + l)/2)
+              * SIGN(l1)
+              * sqrat((p2+1)*(q2+1)*(p2+q2+2)*(k-l+1), (p+1)*(q+1)*(p+q+2)*(k2-l2+1))
+              * (*this)(n, k, l, k1, l1, k2, l2));
 
     return array;
 }
