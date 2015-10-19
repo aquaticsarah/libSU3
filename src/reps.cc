@@ -12,11 +12,11 @@ long dimension(long p, long q)
 }
 
 /* Calculate the degeneracy of the (p,q) irrep in the decomposition of
-   (p1,q1) x (p2,q2). Returns 0 if (p,q) is not a summand in this
-   decomposition.
-   Note: The quantities defined this function are based on
-   arXiv:hep-th/9509167, but are all multiplied by 3 until the very end.
-   We also define delta = gamma + sigma.
+    (p1,q1) x (p2,q2). Returns 0 if (p,q) is not a summand in this
+    decomposition.
+    Note: The intermediate values used in this function are based on those in
+    arXiv:hep-th/9509167, but are all multiplied by 3 relative to that paper.
+    We also define delta = gamma + sigma.
 */
 long degeneracy(long p, long q, long p1, long q1, long p2, long q2)
 {
@@ -28,9 +28,9 @@ long degeneracy(long p, long q, long p1, long q1, long p2, long q2)
     if ((gamma - sigma) % 3) return 0;
 
     /* Aside: The permutation symmetries of the Clebsch-Gordan coefficients
-       act on the parameters of this min() function by permuting its rows
-       or columns, and optionally by adding a constant to all 9 parameters.
-       TODO: Give a proof of this in the documentation.
+        act on the parameters of this min() function by permuting its rows
+        or columns, and optionally by adding a constant to all 9 parameters.
+        TODO: Give a proof of this in the documentation.
     */
     long eta_prime = min(3*p1 + sigma, 3*p2 + sigma, 3*q + sigma,
                          3*q1 + gamma, 3*q2 + gamma, 3*p + gamma,

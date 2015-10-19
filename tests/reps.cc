@@ -47,7 +47,7 @@ TEST(degeneracy)
     } while (0)
 
     /* We use the following test because it has most of the important features:
-       27 x 27 -> 1 + 2x8 + 10 + 10bar + 3x27 + 28 + 28bar + 2x35 + 2x35bar
+        27 x 27 -> 1 + 2x8 + 10 + 10bar + 3x27 + 28 + 28bar + 2x35 + 2x35bar
                 + 2x64 + 81 + 81bar + 125 */
     TEST_DEGENERACY(0, 0, 2, 2, 2, 2, 1);
     TEST_DEGENERACY(1, 1, 2, 2, 2, 2, 2);

@@ -1,5 +1,5 @@
 /* libSU3: Couplings to the state of highest weight
-   (that is, the state of highest I) */
+    (that is, the state of highest I) */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -7,10 +7,10 @@
 #include "SU3_internal.h"
 
 /* Use the A and B recursion relations to step along the
-   k1 and l1 axes within a plane.
+    k1 and l1 axes within a plane.
 
-   The arguments identify the state to be calclated, *not* the values
-   of k1,l1,k2,l2 used in the recursion relation itself.
+    The arguments identify the state to be calclated, *not* the values
+    of k1,l1,k2,l2 used in the recursion relation itself.
 */
 void isoscalar_context::step_k1_up(long n, long s, long k1, long l1)
 {
@@ -73,27 +73,27 @@ void isoscalar_context::step_l1_down(long n, long s, long k1, long l1)
 }
 
 /* Step down from one plane (at s+2) to the next plane (at s).
-   In principle this can fail, in which case you need to use the exchange
-   symmetries in order to calculate the values. This should never happen with
-   this function, however, as isoscalars() has logic for deciding whether this
-   can happen *before* it picks which ISFs to calculate.
+    In principle this can fail, in which case you need to use the exchange
+    symmetries in order to calculate the values. This should never happen with
+    this function, however, as isoscalars() has logic for deciding whether this
+    can happen *before* it picks which ISFs to calculate.
 
-   Note: When doing this, there are two independent choices we can make:
+    Note: When doing this, there are two independent choices we can make:
 
-   * We can try to calculate the value at (k1max,l1min) or at (k1min,l1max)
-     (these require different steps afterwards)
+    * We can try to calculate the value at (k1max,l1min) or at (k1min,l1max)
+        (these require different steps afterwards)
 
-   * We can try recursion relation A or recursion relation B
-     (these require the same steps afterwards)
+    * We can try recursion relation A or recursion relation B
+        (these require the same steps afterwards)
 
-   Each of the four combinations works in different cases, so we intelligently
-   choose between them.
+    Each of the four combinations works in different cases, so we intelligently
+    choose between them.
 
-   Internally, we use the step_k1_up/down and step_l1_up/down functions,
-   but we step "from" a non-existent state (with k1,l1 not in the valid range)
-   to the state we want. This works because 'isoscalar_array' allows us to
-   request (certain) non-existent states and just returns 0 for the coupling
-   coefficient. This is exactly what we need for the stepping to work properly.
+    Internally, we use the step_k1_up/down and step_l1_up/down functions,
+    but we step "from" a non-existent state (with k1,l1 not in the valid range)
+    to the state we want. This works because 'isoscalar_array' allows us to
+    request (certain) non-existent states and just returns 0 for the coupling
+    coefficient. This is exactly what we need for the stepping to work properly.
 */
 void isoscalar_context::step_s_down(long n, long s)
 {
@@ -178,8 +178,9 @@ sqrat isoscalar_context::inner_product(long m, long n)
 }
 
 /* Calculate couplings to the state of highest weight.
-    Returns 1 on success, 0 if we need to try again with
-    the reps conjugated. */
+    This can throw std::logic_error if we can't calculate directly. This should
+    never happen, however, as isoscalars() has logic to avoid those cases.
+*/
 void isoscalar_context::calc_shw()
 {
     long smax = min(A, (2*q1 + 2*q2 + 4*p1 + 4*p2 + q - p)/3);
@@ -199,14 +200,14 @@ void isoscalar_context::calc_shw()
         l1max = min(q1, (A - s)/2);
 
         /* Set one ISF in one particular irrep (leaving the same ISF
-           in the other irreps as zero) */
+            in the other irreps as zero) */
         set_isf(m, p+q, 0, k1min, l1min, (A+s)/2 - k1min, (A-s)/2 - l1min, 1);
 
         for (n = 0; n < d; ++n)
         {
             /* Use recursion relations (possibly involving the plane
-               above the current one, which will already have been filled)
-               to fill out the rest of this plane */
+                above the current one, which will already have been filled)
+                to fill out the rest of this plane */
 
             /* First fill across, from (k1min, l1min) to (k1min, l1max) */
             for (l1 = l1min+1; l1 <= l1max; ++l1)
@@ -223,14 +224,14 @@ void isoscalar_context::calc_shw()
     }
 
     /* Now we have filled out the topmost d planes, step down
-       through the rest of them */
+        through the rest of them */
     for (s = smax - 2*d; s >= smin; s -= 2)
         for (n = 0; n < d; ++n)
             step_s_down(n, s);
 
     /* Orthonormalise the ISFs for different representations.
-       We orthogonalise each rep against *later* reps in order to get equivalent
-       results to the algorithm described in our references. */
+        We orthogonalise each rep against *later* reps in order to get equivalent
+        results to the algorithm described in our references. */
     for (n = d-1; n >= 0; --n)
     {
         sqrat v;

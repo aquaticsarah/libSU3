@@ -68,9 +68,7 @@ sqrat operator-(const sqrat& value)
     return sqrat_raw(-value.v);
 }
 
-/* Arithmetic. Note that for multiplication by scalars,
-   we need to square the other term because all our fractions are
-   implicitly under a square root sign */
+/* Arithmetic */
 sqrat operator*(sqrat left, const sqrat& right)
 {
     left *= right;
@@ -92,8 +90,8 @@ sqrat operator/(sqrat left, const sqrat& right)
 sqrat& sqrat::operator/=(const sqrat& other)
 {
     /* Special case: If dividing by 0, we need to raise an exception,
-       instead of actually doing the division (which would cause a
-       SIGFPE, which we can't catch easily)
+        instead of actually doing the division (which would cause a
+        SIGFPE, which we can't catch easily)
     */
     if (other.v == 0)
         throw std::domain_error("sqrat: division by zero");
@@ -117,7 +115,8 @@ sqrat& sqrat::operator/=(const sqrat& other)
 
     We have a helper function to deal with these reduced cases, then the
     operator+ and operator- methods just need to deal with signs.
-    The 'sign' argument chooses between + (if 1) and - (if 0) */
+    The 'sign' argument chooses between + (if 1) and - (if 0)
+*/
 static mpq_class add_internal(mpq_class v, mpq_class w, int sign)
 {
     if (sign)       return v + 2*sqrt(mpq_class(v*w)) + w;
@@ -125,7 +124,6 @@ static mpq_class add_internal(mpq_class v, mpq_class w, int sign)
     else            return v - 2*sqrt(mpq_class(v*w)) + w;
 }
 
-/* Addition and subtraction */
 sqrat operator+(sqrat left, const sqrat& right)
 {
     left += right;

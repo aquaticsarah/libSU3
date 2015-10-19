@@ -59,7 +59,7 @@ TEST(symmetries)
 }
 
 /* Test only that there are no crashes, but for a large number
-   of representations */
+    of representations */
 TEST(isoscalars_no_crashes)
 {
     isoarray* isf;

@@ -11,8 +11,8 @@
 TEST(cg)
 {
     /* Test 3 x 3bar -> 1 + 8.
-       Note that the ISFs for this are tested in tests/isoscalars.cc, so
-       if there is a bug here we know it is in the conversion ISFs -> CGs
+        Note that the ISFs for this are tested in tests/isoscalars.cc, so
+        if there is a bug here we know it is in the conversion ISFs -> CGs
     */
     cgarray* cg = clebsch_gordans(0, 0, 1, 0, 0, 1);
 

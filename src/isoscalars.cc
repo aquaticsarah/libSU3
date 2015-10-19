@@ -17,7 +17,10 @@ isoscalar_context::isoscalar_context(long p, long q, long p1,
 }
 
 /* Functions to get/set particular isoscalar factors.
-    For some notes on how the indexing is done, see include/SU3.h
+    Indexing is done just like in src/isoarray.cc, with the exception that we
+    allow values which are one space "off the edge" (eg, with l=-1), returning
+    0 for those couplings. This is because doing so greatly simplifies the
+    main calculation code.
 */
 sqrat isoscalar_context::isf(long n, long k, long l, long k1, long l1,
                             long k2, long l2)
@@ -116,10 +119,7 @@ void isoscalar_context::step_l_up(long n, long k, long l, long k1,
     combination of reps. */
 void isoscalar_context::calc_isoscalars()
 {
-    /* Calculate couplings to the state of highest weight (k=p+q, l=0).
-        This may fail, in which case we return to the top-level function
-        which will try using symmetries to convert into a solvable problem.
-    */
+    /* Calculate couplings to the state of highest weight (k=p+q, l=0). */
     this->calc_shw();
 
     /* Then fill in the rest of the couplings */
@@ -191,11 +191,12 @@ static int can_calculate(long p, long q, long p1, long q1, long p2, long q2,
 }
 
 /* Internal: Calculate values for one irrep combination, without trying
-    the symmetry relations */
+    the symmetry relations. Returns NULL on failure.
+*/
 isoarray* isoscalars_single(long p, long q, long p1, long q1,
                                     long p2, long q2, long d)
 {
-    /* Check that our calculations will succeed, before we do them */
+    /* Check that a direct calculation will succeed, before we do it */
     if (! can_calculate(p, q, p1, q1, p2, q2, d))
         return NULL;
 

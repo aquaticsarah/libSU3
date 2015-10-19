@@ -28,8 +28,8 @@ extern int tests_passed;
     } while (0)
 
 /* Helper for tests involving the sqrat type
-   (tests if a == sqrat(p,q)). "thing" is what the calculation
-   is supposed to represent */
+    (tests if a == sqrat(p,q)). "thing" is what the calculation
+    is supposed to represent */
 #define TEST_EQ_SQRAT(a, p, q, thing, args...) \
     do \
     { \

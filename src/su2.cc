@@ -13,15 +13,14 @@ static long mpq_to_long(mpq_class x)
 {
     mpz_class num = x.get_num(), denom = x.get_den();
     if (denom != 1)
-        throw std::domain_error("Trying to convert non-integer fraction "
-                                "to long");
+        throw std::domain_error("Isospin value is not a half-integer.");
 
     return num.get_si();
 }
 
 static mpz_class factorial(long x)
 {
-    if (x < 0) throw std::domain_error("Factorial of a negative number");
+    if (x < 0) throw std::domain_error("Factorial of a negative number.");
 
     mpz_class res;
     mpz_fac_ui(res.get_mpz_t(), x);
@@ -40,8 +39,8 @@ sqrat su2_cgc_2i(long I, long Iz, long i1, long i1z,
     /* Only states obeying the following conditions can couple:
         Iz = i1z + i2z
         i1 + i2 >= I >= |i1 - i2|
-       Note |i1 - i2| = max(i1-i2, i2-i1), and so we can rewrite the last
-       inequality as (I >= i1 - i2) && (I >= i2 - i1)
+        Note |i1 - i2| = max(i1-i2, i2-i1), and so we can rewrite the last
+        inequality as (I >= i1 - i2) && (I >= i2 - i1)
     */
     if (Iz != i1z + i2z) return sqrat(0);
     if ((I > i1 + i2) || (I < i1 - i2) || (I < i2 - i1)) return sqrat(0);

@@ -111,7 +111,10 @@ private:
     /* Calculate the inner product of two sets of isoscalar factors */
     sqrat inner_product(long m, long n);
 
-    /* Calculate couplings to the state of highest weight in each multiplet */
+    /* Calculate couplings to the state of highest weight.
+        This can throw std::logic_error if we can't calculate directly. This should
+        never happen, however, as isoscalars() has logic to avoid those cases.
+    */
     void calc_shw();
 
     /* Fill out each multiplet, assuming that the SHWs have been calculated */

@@ -1,5 +1,20 @@
 /* libSU3: Externally-visible container for isoscalar coefficients
-    For some notes on how the indexing is done, see include/SU3.h
+
+    Notes on indexing:
+    - All reps in a degenerate set need to be processed at once, so we
+        allocate storage all at once.
+
+    - For each of the three reps involved, we have the following ranges:
+        q <= k <= p+q (for a total of p+1 possible values of k)
+        0 <= l <= q   (for a total of q+1 possible values of l)
+        The value of 'l' can be used as an index directly, but that for
+        'k' needs to be shifted down by q.
+
+    - Given k, l, k1, l1, k2, there is a unique valid value of l2 determined
+        by hypercharge conservation. As such, we can save a factor of (q2+1) on
+        memory space by not allocating an l2 axis.
+        However, we do accept l2 as an argument and, unless -DNDEBUG is
+        specified when compiling the library, we check that it is valid.
 */
 
 #include <assert.h>

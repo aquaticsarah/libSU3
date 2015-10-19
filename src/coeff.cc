@@ -1,14 +1,17 @@
 /* libSU3: Coefficients for the various recursion relations we use
 
-   Note: The functions step_s_down_* often make steps "from" locations
-   which do not correspond to valid states. In those cases, we know that
-   the corresponding coefficient will always be ignored. However, in those
-   cases, the coefficient is sometimes indeterminate or infinite, and this
-   causes problems. Specifically, this occurs if one of k1-l1 or k2-l2 is
-   zero.
+    Note: The functions step_s_down_* often make steps "from" locations
+    which do not correspond to valid states. In those cases, we know that
+    the corresponding coefficient will always be ignored. However, in those
+    cases, the coefficient is sometimes indeterminate or infinite, and this
+    causes problems. Specifically, this occurs if one of k1-l1 or k2-l2 is
+    zero.
 
-   Because the coefficient is ignored in those cases, we can safely
-   special-case it to be zero instead. */
+    Because the coefficient is ignored in those cases, we can safely
+    special-case it to be zero instead.
+
+    The values used here are taken from Kaeding and Williams.
+*/
 
 #include "SU3_internal.h"
 

@@ -60,7 +60,7 @@ static int check_orthogonal(long p1, long q1, long p2, long q2)
     assert(index == N*N);
 
     /* Now check that the matrix is orthogonal. We only need to check
-       the inner product of each row with previous rows (and itself)
+        the inner product of each row with previous rows (and itself)
     */
     long m, n;
     for (m = 0; m < N; ++m)
