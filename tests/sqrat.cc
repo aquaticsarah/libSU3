@@ -3,19 +3,28 @@
 #include "SU3.h"
 #include "test.h"
 
+/* Test constructors and reduction */
 TEST(sqrat)
 {
-    /* Test reduction */
-    sqrat a(2, 4);
+    sqrat a;
+
+    a = sqrat(mpz_class(3), mpz_class(4));
+    TEST_EQ_SQRAT(a, 3, 4, "reduce(sqrt(3/4))");
+
+    a = sqrat(2L, 4L);
     TEST_EQ_SQRAT(a, 1, 2, "reduce(sqrt(2/4))");
 
-    a = sqrat(3, -3);
-    TEST_EQ_SQRAT(a, -1, 1, "reduce(sqrt(3/-3))");
+    a = mpq_class(3, 6);
+    TEST_EQ_SQRAT(a, 1, 4, "reduce(3/6)");
 
-    a = sqrat(-11);
-    TEST_EQ_SQRAT(a, -121, 1, "-11");
+    a = mpq_class(-11L);
+    TEST_EQ_SQRAT(a, -121, 1, "reduce(-11)");
+
+    a = sqrat();
+    TEST_EQ_SQRAT(a, -0, 1, "reduce(0)");
 }
 
+/* Test numerical values */
 TEST(sqrat_to_double)
 {
     sqrat a;

@@ -6,12 +6,6 @@
 
 #include "SU3_internal.h"
 
-/* Helper: Calculate sign(x) * x^2 */
-static long sign_square(long x)
-{
-    return x*abs(x);
-}
-
 /* Helper: Calculate the square root of an integer, which must be a square.
     Raises an exception if the values is not a square */
 static mpq_class sqrt(mpq_class x)
@@ -37,11 +31,8 @@ static mpq_class sqrt(mpq_class x)
     return res;
 }
 
-/* Various constructors
-   Note that when initialising with an integer,
-   we need to square it because all our fractions are
-   implicitly under a square root sign */
-sqrat::sqrat(mpq_class v) : v(v)
+/* Component-wise constructors. sqrat(p, q) returns sign(pq) * sqrt(|p|/|q|) */
+sqrat::sqrat(mpz_class num, mpz_class denom) : v(num, denom)
 {
     v.canonicalize();
 }
@@ -51,23 +42,30 @@ sqrat::sqrat(long num, long denom) : v(num, denom)
     v.canonicalize();
 }
 
-sqrat::sqrat(mpz_class num, mpz_class denom) : v(num, denom)
+/* Casts from other types. sqrat(x) returns a value which should equal x. */
+sqrat::sqrat(mpq_class v) : v(v*abs(v))
 {
     v.canonicalize();
 }
 
-sqrat::sqrat(long i) : v(sign_square(i)) {}
+sqrat::sqrat(long v) : v(v*abs(v)) {}
 sqrat::sqrat() : v(0) {}
+
+/* Internal constructor: Build a value which is sign(v) * sqrt(|v|) */
+static sqrat sqrat_raw(mpq_class v)
+{
+    return sqrat(v.get_num(), v.get_den());
+}
 
 /* Unary operators */
 sqrat operator+(const sqrat& value)
 {
-    return sqrat(value.v);
+    return sqrat_raw(value.v);
 }
 
 sqrat operator-(const sqrat& value)
 {
-    return sqrat(-value.v);
+    return sqrat_raw(-value.v);
 }
 
 /* Arithmetic. Note that for multiplication by scalars,
@@ -182,7 +180,7 @@ sqrat& sqrat::operator-=(const sqrat& other)
 
 sqrat sqrt(const sqrat& value)
 {
-    return sqrat(sqrt(value.v));
+    return sqrat_raw(sqrt(value.v));
 }
 
 /* Comparisons */

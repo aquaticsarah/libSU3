@@ -15,9 +15,12 @@ private:
     mpq_class v;
 
 public:
-    sqrat(mpq_class v);
-    sqrat(long, long);
+    /* Component-wise constructors. sqrat(p, q) returns sign(pq) * sqrt(|p|/|q|) */
     sqrat(mpz_class, mpz_class);
+    sqrat(long, long);
+
+    /* Casts from other types. sqrat(x) returns a value which should equal x. */
+    sqrat(mpq_class);
     sqrat(long);
     sqrat();
 

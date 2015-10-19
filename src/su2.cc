@@ -68,7 +68,7 @@ sqrat su2_cgc_2i(long I, long Iz, long i1, long i1z,
         sum += mpq_class(SIGN(z), denominator);
     }
 
-    return prefactor * sqrat(sum * abs(sum));
+    return prefactor * sum;
 }
 
 /* Calculate a single SU(2) Clebsch-Gordan coefficient.
