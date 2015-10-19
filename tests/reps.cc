@@ -108,17 +108,16 @@ void test_product_rep(long p1, long q1, long p2, long q2)
 TEST(rep_sizes)
 {
     srand(time(NULL));
-#define RANDRANGE(n) ((long)((random() / (double)RAND_MAX) * n))
 
     /* Do some randomised tests */
     int i;
     long p1, q1, p2, q2;
-    for (i = 0; i < 100; ++i)
+    for (i = 0; i < 10; ++i)
     {
-        p1 = RANDRANGE(100);
-        q1 = RANDRANGE(100);
-        p2 = RANDRANGE(100);
-        q2 = RANDRANGE(100);
+        p1 = RANDRANGE(20);
+        q1 = RANDRANGE(20);
+        p2 = RANDRANGE(20);
+        q2 = RANDRANGE(20);
         test_product_rep(p1, q1, p2, q2);
     }
 }

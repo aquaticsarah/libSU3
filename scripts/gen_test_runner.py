@@ -28,6 +28,9 @@ MIDDLE = """\
 
 int main()
 {
+    srand(time(NULL));
+    int total_tests_run = 0, total_tests_passed = 0;
+
 """
 
 # Run each test and print its results
@@ -37,11 +40,17 @@ RUN = """\
     fprintf(stderr, "\\nTesting %s...\\n");
     test_%s();
     fprintf(stderr, "%s: %%d/%%d tests passed\\n", tests_passed, tests_run);
+    total_tests_run += tests_run;
+    total_tests_passed += tests_passed;
 
 """
 
 FOOTER = """\
-    return 0;
+    printf("\\nSummary: %d/%d tests passed\\n", total_tests_passed, total_tests_run);
+    if (total_tests_passed < total_tests_run)
+        return 1;
+    else
+        return 0;
 }
 """
 

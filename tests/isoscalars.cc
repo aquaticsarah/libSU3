@@ -64,17 +64,19 @@ TEST(isoscalars_no_crashes)
 {
     isoarray* isf;
 
+    int i;
     long p, q, p1, q1, p2, q2;
-    for (p = 0; p < 5; ++p)
-        for (q = 0; q < 5; ++q)
-            for (p1 = 0; p1 < 5; ++p1)
-                for (q1 = 0; q1 < 5; ++q1)
-                    for (p2 = 0; p2 < 5; ++p2)
-                        for (q2 = 0; q2 < 5; ++q2)
-                        {
-                            isf = isoscalars(p, q, p1, q1, p2, q2);
-                            delete isf;
-                        }
+    for (i = 0; i < 10; ++i)
+    {
+        p = RANDRANGE(10);
+        q = RANDRANGE(10);
+        p1 = RANDRANGE(10);
+        q1 = RANDRANGE(10);
+        p2 = RANDRANGE(10);
+        q2 = RANDRANGE(10);
+        isf = isoscalars(p, q, p1, q1, p2, q2);
+        delete isf;
+    }
 
     DO_TEST(1, "Shouldn't happen");
 }

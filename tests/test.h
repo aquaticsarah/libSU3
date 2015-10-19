@@ -4,9 +4,13 @@
 #define __SU3_TEST_H__
 
 #include <stdio.h>
+#include <stdlib.h>
 
 extern int tests_run;
 extern int tests_passed;
+
+/* Macro for generating random values in [0,n) */
+#define RANDRANGE(n) ((long)((random() / (double)RAND_MAX) * n))
 
 /* A label to indicate which functions are top-level tests.
     'module' should be the name of the module being tested (not in quotes) */
