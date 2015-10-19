@@ -11,6 +11,10 @@ default: libSU3.a
 debug: libSU3-debug.a
 profile: libSU3-prof.a
 
+su3: $(BUILDDIR)/progs/su3.o libSU3.a
+	@echo "Linking su3"
+	@$(LD) $(LDFLAGS) $(BUILDDIR)/progs/su3.o libSU3.a $(LIBRARIES) -o $@
+
 test: run-tests
 	@echo "Running tests"
 	@./run-tests
@@ -25,7 +29,7 @@ clean:
 clean-all:
 	@echo "Cleaning up everything"
 	@rm -rf $(BUILDDIR)/
-	@rm -f libSU3*.a run-tests run-bench
+	@rm -f libSU3*.a run-tests run-bench su3
 
 # Intermediate files
 libSU3.a libSU3-debug.a libSU3-prof.a:
