@@ -21,10 +21,12 @@
             for (k1 = q1; k1 <= p1+q1; ++k1) \
                 for (l1 = 0; l1 <= q1; ++l1) \
                     for (k2 = q2; k2 <= p2+q2; ++k2) \
-                        if (/* Assign l2, then check it is in range */ \
-                            l2 = (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3 \
+                        /* Assign l2, then check it is in range */ \
+                        if (l2 = (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3 \
                                - (k1 + l1 + k2 - k - l), \
-                            ((l2 >= 0) && (l2 <= q2)))
+                            ((l2 >= 0) && (l2 <= q2))) \
+                            /* Also check isospin ranges */ \
+                            if ((abs(k1-l1-k2+l2) <= k-l) && (k-l <= k1-l1+k2-l2))
 
 #define FOREACH_CGC(p, q, p1, q1, p2, q2, k, l, m, k1, l1, m1, k2, l2, m2) \
     FOREACH_ISF(p, q, p1, q1, p2, q2, k, l, k1, l1, k2, l2) \
