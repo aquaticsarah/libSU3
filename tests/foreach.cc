@@ -40,6 +40,8 @@ TEST(foreach_isf)
     DO_TEST(count_foreach == count_all,
             "FOREACH_ISF does not cover all nonzero couplings: Covers only %ld out of %ld.",
             count_foreach, count_all);
+
+    delete isf;
 }
 
 TEST(foreach_cgc)
@@ -78,4 +80,6 @@ TEST(foreach_cgc)
     DO_TEST(count_foreach == count_all,
             "FOREACH_CGC does not cover all nonzero couplings: Covers only %ld out of %ld.",
             count_foreach, count_all);
+
+    delete cg;
 }

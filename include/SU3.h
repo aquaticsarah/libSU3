@@ -197,6 +197,9 @@ sqrat su2_cgc(mpq_class I, mpq_class Iz, mpq_class i1, mpq_class i1z,
 /* Main calculation functions.
     Note that if the calculation fails, these can throw std::logic_error.
     However, this should never happen unless there is a bug in the library.
+
+    Note: These both return heap-allocated objects, which should be deleted
+    with 'delete' when you are finished with them.
 */
 isoarray* isoscalars(long p, long q, long p1, long q1, long p2, long q2);
 cgarray* clebsch_gordans(long p, long q, long p1, long q1, long p2, long q2);
