@@ -65,25 +65,22 @@ void isoarray::set_isf(long n, long k, long l, long k1, long l1,
 sqrat isoarray::operator()(long n, long k, long l, long k1, long l1,
                             long k2, long l2)
 {
-    /* Bounds checks */
-    assert((n >= 0) && (n < d));
-    assert((k >= q) && (k <= p+q));
-    assert((l >= 0) && (l <= q));
-    assert((k1 >= q1) && (k1 <= p1+q1));
-    assert((l1 >= 0) && (l1 <= q1));
-    assert((k2 >= q2) && (k2 <= p2+q2));
-    assert((l2 >= 0) && (l2 <= q2));
+    /* Bounds checks - as this is a user-visible function, we don't want
+        to crash if an invalid value is passed, just to return zero.
+    */
+    if (    (n < 0) || (n >= d)
+         || (k  < q ) || (k  > p +q ) || (l  < 0) || (l  > q )
+         || (k1 < q1) || (k1 > p1+q1) || (l1 < 0) || (l1 > q1)
+         || (k2 < q2) || (k2 > p2+q2) || (l2 < 0) || (l2 > q2))
+        return 0;
 
     /* Check hypercharge conservation */
     if(k1+l1+k2+l2-k-l != (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3)
         return sqrat(0);
 
-    /* If compiled with -DNDEBUG, this line is to remove a compiler warning
-        about l2 being unused */
-    (void)l2;
-
     size_t index = ((((n * (p+1) + k-q) * (q+1) + l) * (p1+1) + k1-q1)
                     * (q1+1) + l1) * (p2+1) + k2-q2;
+    assert(index < size);
     return isf_array[index];
 }
 

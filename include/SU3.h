@@ -102,20 +102,19 @@ class isoarray
     friend class cgarray;
     
 private:
-    isoarray* isf;
     size_t size; // Size of the following array
     sqrat* isf_array;
 
     void set_isf(long n, long k, long l, long k1, long l1,
                     long k2, long l2, sqrat v);
 
+public:
     /* Target and factor reps */
     const long p, q, p1, q1, p2, q2;
 
     /* Degeneracy of target rep */
     const long d;
 
-public:
     /* Note: This type takes ownership of the array passed in - that is, it will
         delete the array when the isoarray object is deleted. */
     isoarray(long p, long q, long p1, long q1, long p2, long q2, long d,
@@ -123,7 +122,9 @@ public:
     ~isoarray();
 
     /* We use operator() instead of operator[] as an easy way to use
-        multiple indices */
+        multiple indices.
+        Returns 0 if the arguments are out of bounds
+    */
     sqrat operator()(long n, long k, long l, long k1, long l1,
                         long k2, long l2);
 

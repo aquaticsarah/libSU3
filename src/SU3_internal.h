@@ -8,12 +8,9 @@
 /* Various useful functions */
 long min(long, long);
 long min(long, long, long);
-long min(long, long, long, long);
 long min(long, long, long, long, long, long, long, long, long);
 long max(long, long);
 long max(long, long, long);
-long max(long, long, long, long, long, long);
-long gcd(long, long);
 
 /* Macro to calculate (-1)^v */
 #define SIGN(v) ((((v) % 2) == 0) ? 1 : -1)
