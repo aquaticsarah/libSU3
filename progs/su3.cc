@@ -16,18 +16,13 @@ enum print_mode
 const char* usage_message = "\
 Usage: %s [isf|cgc] (p1,q1)x(p2,q2)[->(p,q)[,n]]\n\
 \n\
-If the last representation (the part after '->'') is not specified, we do the\n\
+If the last representation (the part after '->') is not specified, we do the\n\
 full decomposition of (p1,q1) x (p2,q2). Otherwise, we only print the values\n\
 for the given target rep.\n\
 \n\
 If n is given, then we only print the nth degenerate representation (n must be\n\
 in the range 1,...,d where d is the degeneracy). Otherwise (or if n is given\n\
 as -1) we print all degenerate representations.\n\
-\n\
-Flags:\n\
---isf: Print ISFs\n\
---cgc: Print CGCs\n\
-If neither is given, we default to printing the ISFs only\n\
 ";
 
 char* progname;
