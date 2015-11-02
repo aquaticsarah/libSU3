@@ -103,7 +103,7 @@ cgarray* isoarray::to_cgarray()
 /* Apply the various symmetry relations */
 isoarray* isoarray::exch_12()
 {
-    size_t new_size = (p+1)*(q+1)+(p2+1)*(q2+1)*(p1+1);
+    size_t new_size = d * (p+1) * (q+1) * (p2+1) * (q2+1) * (p1+1);
     sqrat* new_isf_array = new sqrat[new_size];
     isoarray* array = new isoarray(p, q, p2, q2, p1, q1, d, new_isf_array);
 
@@ -112,7 +112,7 @@ isoarray* isoarray::exch_12()
     long n, k, l, k1, l1, k2, l2;
 
     for (n = 0; n < d; ++n)
-        FOREACH_ISF(p, q, p1, q1, p2, q2, k, l, k1, l1, k2, l2)
+        FOREACH_ISF(p, q, p2, q2, p1, q1, k, l, k2, l2, k1, l1)
             array->set_isf(n, k, l, k2, l2, k1, l1,
                 SIGN((k-l-k1+l1-k2+l2)/2) * xi_1
                 * (*this)(n, k, l, k1, l1, k2, l2));
@@ -142,22 +142,11 @@ isoarray* isoarray::exch_13bar()
 /* Combination of the above two, for simplicity */
 isoarray* isoarray::exch_23bar()
 {
-    size_t new_size = d*(q2+1)*(p2+1)*(p1+1)*(q1+1)*(q+1);
-    sqrat* new_isf_array = new sqrat[new_size];
-    isoarray* array = new isoarray(q2, p2, p1, q1, q, p, d, new_isf_array);
+    isoarray* tmp1 = this->exch_12();
+    isoarray* tmp2 = tmp1->exch_13bar();
+    isoarray* result = tmp2->exch_12();
 
-    /* Fill the new array */
-    long xi_1 = phase_exch_12(p, q, p1, q1, p2, q2);
-    long n, k, l, k1, l1, k2, l2;
-
-    for (n = 0; n < d; ++n)
-        FOREACH_ISF(p, q, p1, q1, p2, q2, k, l, k1, l1, k2, l2)
-            array->set_isf(n, p2+q2-l2, p2+q2-k2, k1, l1, p+q-l, p+q-k,
-                xi_1
-              * SIGN((k1 - l1 + k2 - l2 - k + l)/2)
-              * SIGN(l1)
-              * sqrat((p2+1)*(q2+1)*(p2+q2+2)*(k-l+1), (p+1)*(q+1)*(p+q+2)*(k2-l2+1))
-              * (*this)(n, k, l, k1, l1, k2, l2));
-
-    return array;
+    delete tmp1;
+    delete tmp2;
+    return result;
 }

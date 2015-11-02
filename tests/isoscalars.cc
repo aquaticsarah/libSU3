@@ -33,31 +33,6 @@ TEST(3x3bar)
     delete isf;
 }
 
-/* A family of tests designed to exercise the code which calculates the ISFs
-    for one rep by using the symmetry relations, rather than directly.
-    TODO: These tests should pass iff the calculation function doesn't
-    throw an exception.
-*/
-TEST(symmetries)
-{
-    isoarray* isf;
-
-    /* Can be calculated directly */
-    isf = isoscalars(2, 3, 1, 2, 1, 1);
-    DO_TEST(isf != NULL, "Empty irrep");
-    delete isf;
-
-    /* Needs to use the 1<->3bar symmetry */
-    isf = isoscalars(1, 1, 3, 2, 1, 2);
-    DO_TEST(isf != NULL, "Empty irrep");
-    delete isf;
-
-    /* Needs to use the 2<->3bar symmetry */
-    isf = isoscalars(1, 1, 1, 2, 3, 2);
-    DO_TEST(isf != NULL, "Empty irrep");
-    delete isf;
-}
-
 /* Test only that there are no crashes, but for a large number
     of representations */
 TEST(isoscalars_no_crashes)
@@ -79,4 +54,86 @@ TEST(isoscalars_no_crashes)
     }
 
     DO_TEST(1, "Shouldn't happen");
+}
+
+/* Helper: Test if two isoarray objects (with the same parameters)
+    contain the same values.
+*/
+static void check_isfs_equal(isoarray* isf1, isoarray* isf2, const char* msg)
+{
+    /* Check that the factor and target reps are the same */
+    long p = isf1->p, q = isf1->q, p1 = isf1->p1, q1 = isf1->q1,
+        p2 = isf1->p2, q2 = isf1->q2, d = isf1->d;
+
+    bool condition = (isf2->p == p) && (isf2->q == q) &&
+                     (isf2->p1 == p1) && (isf2->q1 == q1) &&
+                     (isf2->p2 == p2) && (isf2->q2 == q2);
+
+    DO_TEST(condition,
+            "%s: Rep combinations differ: (%ld,%ld)x(%ld,%ld)->(%ld,%ld) "
+            "vs. (%ld,%ld)x(%ld,%ld)->(%ld,%ld)\n",
+            msg, p1, q1, p2, q2, p, q,
+            isf2->p1, isf2->q1, isf2->p2, isf2->q2, isf2->p, isf2->q);
+    if (! condition) return;
+
+    /* Check that the values are the same */
+    long n, k, l, k1, l1, k2, l2;
+
+    for (n = 0; n < d; ++n)
+        FOREACH_ISF(p, q, p1, q1, p2, q2, k, l, k1, l1, k2, l2)
+        {
+            if ((*isf1)(n, k, l, k1, l1, k2, l2) != (*isf2)(n, k, l, k1, l1, k2, l2))
+            {
+
+                DO_TEST(0, "%s: ISFs differ at (%ld,%ld) : (%ld,%ld) x (%ld,%ld) "
+                           "in rep %ld.\n",
+                        msg, k, l, k1, l1, k2, l2, d);
+            }
+        }
+
+    DO_TEST(1, "\n");
+}
+
+/* Test that the various symmetry relations do the right thing */
+TEST(symmetries)
+{
+    isoarray* isf1, * isf2, * isf3, * isf_tmp, * isf_tmp2;
+
+    long p=2, q=1, p1=1, q1=1, p2=1, q2=0;
+
+    isf1 = isoscalars(p, q, p1, q1, p2, q2);
+
+    /* Test that the relations are self-inverse */
+    isf_tmp = isf1->exch_12();
+    isf2 = isf_tmp->exch_12();
+    check_isfs_equal(isf1, isf2, "Testing 1<->2 self-inverse");
+    delete isf_tmp;
+    delete isf2;
+
+    isf_tmp = isf1->exch_13bar();
+    isf2 = isf_tmp->exch_13bar();
+    check_isfs_equal(isf1, isf2, "Testing 1<->3bar self-inverse");
+    delete isf_tmp;
+    delete isf2;
+
+    isf_tmp = isf1->exch_23bar();
+    isf2 = isf_tmp->exch_23bar();
+    check_isfs_equal(isf1, isf2, "Testing 2<->3bar self-inverse");
+    delete isf_tmp;
+    delete isf2;
+
+    /* Test also that exch_23bar() is equivalent to the sequence
+        exch_12(), exch_13bar(), exch_12()
+    */
+    isf_tmp = isf1->exch_12();
+    isf_tmp2 = isf_tmp->exch_13bar();
+    isf2 = isf_tmp2->exch_12();
+    isf3 = isf1->exch_23bar();
+    check_isfs_equal(isf2, isf3, "Testing 2<->3bar identity");
+    delete isf_tmp;
+    delete isf_tmp2;
+    delete isf2;
+    delete isf3;
+
+    delete isf1;
 }
