@@ -14,6 +14,25 @@
     Additionally, we do not iterate over degenerate representations.
     Each argument is evaluated multiple times, and k*, l* are expected to
     be simple variables.
+
+    Currently, we use the following properties to reduce the number of states
+    iterated over:
+    i) Hypercharge conservation implies
+        k1 + l1 + k2 + l2 - k - l = (2*p1 + 2*p2 + 4*q1 + 4*q2 - 2*p - 4*q)/3
+    ii) Isospin conservation implies that:
+
+        |i1 - i2| <= I <= i1 + i2
+        i1 + i2 - I is an integer
+        Iz = i1z + i2z
+
+        or, in terms of our variables, where I = (k-l)/2, Iz = (2*m-k-l)/2,
+
+        |k1 - l1 - k2 + l2| <= k - l <= k1 - l1 + k2 - l2
+        k1 - l1 + k2 - l2 - k + l is even
+        2*m - k - l = 2*m1 - k1 - l1 + 2*m2 - k2 - l2
+
+        where we can rewrite the last condition as
+        m2 = (m - m1) - (k + l - k1 - l1 - k2 - l2)/2
 */
 #define FOREACH_ISF(p, q, p1, q1, p2, q2, k, l, k1, l1, k2, l2) \
     for (k = q; k <= p+q; ++k) \
@@ -34,7 +53,7 @@
             for (m = l; m <= k; ++m) \
                 for (m1 = l1; m1 <= k1; ++m1) \
                     if (/* Assign m2, then check it is in range */ \
-                        m2 = m-l-m1+l1+l2-(k-l-k1+l1-k2+l2)/2, \
+                        m2 = (m - m1) - (k + l - k1 - l1 - k2 - l2)/2, \
                         ((m2 >= l2) && (m2 <= k2)))
 
 
@@ -102,7 +121,7 @@ class cgarray;
 class isoarray
 {
     friend class cgarray;
-    
+
 private:
     size_t size; // Size of the following array
     sqrat* isf_array;

@@ -100,7 +100,9 @@ cgarray* isoarray::to_cgarray()
     return new cgarray(isf);
 }
 
-/* Apply the various symmetry relations */
+/* Apply the various symmetry relations.
+    The formulas for these relations are adapted from Williams.
+*/
 isoarray* isoarray::exch_12()
 {
     size_t new_size = d * (p+1) * (q+1) * (p2+1) * (q2+1) * (p1+1);

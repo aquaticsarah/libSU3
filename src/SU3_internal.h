@@ -40,7 +40,7 @@ private:
     /* Calculate the coefficients for each of the four recursion relations.
        Each stores the coefficients in its last four arguments.
        The expressions are based on arXiv:nucl-th/9511025.
-        
+
        Note: The functions step_s_down_* often make steps "from" locations
        which do not correspond to valid states. In those cases, we know that
        the corresponding coefficient will always be ignored. However, in those

@@ -122,7 +122,7 @@ void isoscalar_context::step_s_down(long n, long s)
             step_l1_up(n, s, k1max, l1min);
         else
             throw std::logic_error("Couldn't use any recursion relations. "
-                                    "This should never happen!\n");
+                                    "Please report this as a bug in libSU3.\n");
 
         /* If we get here, we succeded at (k1max, l1min).
             So fill out the rest of this plane from this point. */
@@ -184,7 +184,7 @@ sqrat isoscalar_context::inner_product(long m, long n)
 void isoscalar_context::calc_shw()
 {
     long smax = min(A, (2*q1 + 2*q2 + 4*p1 + 4*p2 + q - p)/3);
-    long smin = max(p + q, 2*q1 + 2*q2 - A);
+    long smin = max(p + q, abs(2*q1 + 2*q2 - A));
 
     long k1min, k1max, l1min, l1max;
     long k1, l1, k2, l2;

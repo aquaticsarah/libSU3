@@ -174,7 +174,7 @@ static int can_calculate(long p, long q, long p1, long q1, long p2, long q2,
     long A  = (2*p1 + 2*p2 + 4*q1 + 4*q2 + p - q)/3;
     long Ar = (2*q1 + 2*q2 + 4*p1 + 4*p2 + q - p)/3;
     long smax = min(A, Ar);
-    long smin = max(p + q, 2*q1 + 2*q2 - A);
+    long smin = max(p + q, abs(2*q1 + 2*q2 - A));
 
     /* The only way a calculation can fail is if the step down to s = smax-2*d fails.
         This happens iff all of the following conditions fail. Each corresponds to
@@ -246,7 +246,8 @@ isoarray* isoscalars(long p, long q, long p1, long q1, long p2, long q2)
     }
 
     /* If we get here, nothing has worked, so throw an error */
-    throw std::logic_error("Calculation of ISFs failed");
+    throw std::logic_error("Calculation of ISFs failed. "
+                            "please report this as a bug in libSU3.");
 }
 
 /* Wrapper around the above to provide an array of Clebsch-Gordans instead */

@@ -27,10 +27,8 @@ long degeneracy(long p, long q, long p1, long q1, long p2, long q2)
     /* Reps can only appear if gamma-sigma is a multiple of three */
     if ((gamma - sigma) % 3) return 0;
 
-    /* Aside: The permutation symmetries of the Clebsch-Gordan coefficients
-        act on the parameters of this min() function by permuting its rows
-        or columns, and optionally by adding a constant to all 9 parameters.
-        TODO: Give a proof of this in the documentation.
+    /* Aside: This is invariant under all of the symmetry transformations.
+        See docs/degeneracy.md for proof.
     */
     long eta_prime = min(3*p1 + sigma, 3*p2 + sigma, 3*q + sigma,
                          3*q1 + gamma, 3*q2 + gamma, 3*p + gamma,
