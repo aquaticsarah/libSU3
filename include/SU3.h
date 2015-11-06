@@ -129,6 +129,9 @@ private:
     void set_isf(long n, long k, long l, long k1, long l1,
                     long k2, long l2, sqrat v);
 
+    /* Internal: Check that the sign convention is obeyed. */
+    void check_sign_convention();
+
 public:
     /* Target and factor reps */
     const long p, q, p1, q1, p2, q2;

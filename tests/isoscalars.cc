@@ -43,12 +43,12 @@ TEST(isoscalars_no_crashes)
     long p, q, p1, q1, p2, q2;
     for (i = 0; i < 10; ++i)
     {
-        p = RANDRANGE(10);
-        q = RANDRANGE(10);
-        p1 = RANDRANGE(10);
-        q1 = RANDRANGE(10);
-        p2 = RANDRANGE(10);
-        q2 = RANDRANGE(10);
+        p = RANDRANGE(5);
+        q = RANDRANGE(5);
+        p1 = RANDRANGE(5);
+        q1 = RANDRANGE(5);
+        p2 = RANDRANGE(5);
+        q2 = RANDRANGE(5);
         isf = isoscalars(p, q, p1, q1, p2, q2);
         delete isf;
     }
@@ -84,56 +84,97 @@ static void check_isfs_equal(isoarray* isf1, isoarray* isf2, const char* msg)
         {
             if ((*isf1)(n, k, l, k1, l1, k2, l2) != (*isf2)(n, k, l, k1, l1, k2, l2))
             {
-
+                char buf1[64], buf2[64];
+                (*isf1)(n, k, l, k1, l1, k2, l2).tostring(buf1, 64);
+                (*isf2)(n, k, l, k1, l1, k2, l2).tostring(buf2, 64);
                 DO_TEST(0, "%s: ISFs differ at (%ld,%ld) : (%ld,%ld) x (%ld,%ld) "
-                           "in rep %ld.\n",
-                        msg, k, l, k1, l1, k2, l2, d);
+                           "in rep %ld; values: %s vs. %s\n",
+                        msg, k, l, k1, l1, k2, l2, n, buf1, buf2);
+                return;
             }
         }
 
     DO_TEST(1, "\n");
 }
 
+#define SIGN(x) (((x) % 2) ? -1L : 1L)
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
 /* Test that the various symmetry relations do the right thing */
 TEST(symmetries)
 {
     isoarray* isf1, * isf2, * isf3, * isf_tmp, * isf_tmp2;
 
-    long p=2, q=1, p1=1, q1=1, p2=1, q2=0;
+    long p, q, p1, q1, p2, q2;
+    int i;
 
-    isf1 = isoscalars(p, q, p1, q1, p2, q2);
+    for (i = 0; i < 10; ++i)
+    {
+        /* Find a combination of irreps which definitely couples */
+        do
+        {
+            p = RANDRANGE(5);
+            q = RANDRANGE(5);
+            p1 = RANDRANGE(5);
+            q1 = RANDRANGE(5);
+            p2 = RANDRANGE(5);
+            q2 = RANDRANGE(5);
 
-    /* Test that the relations are self-inverse */
-    isf_tmp = isf1->exch_12();
-    isf2 = isf_tmp->exch_12();
-    check_isfs_equal(isf1, isf2, "Testing 1<->2 self-inverse");
-    delete isf_tmp;
-    delete isf2;
+            isf1 = isoscalars(p, q, p1, q1, p2, q2);
+        } while (! isf1);
 
-    isf_tmp = isf1->exch_13bar();
-    isf2 = isf_tmp->exch_13bar();
-    check_isfs_equal(isf1, isf2, "Testing 1<->3bar self-inverse");
-    delete isf_tmp;
-    delete isf2;
+        /* Test that the relations are self-inverse */
+        isf_tmp = isf1->exch_12();
+        isf2 = isf_tmp->exch_12();
+        check_isfs_equal(isf1, isf2, "Testing 1<->2 self-inverse");
+        delete isf_tmp;
+        delete isf2;
 
-    isf_tmp = isf1->exch_23bar();
-    isf2 = isf_tmp->exch_23bar();
-    check_isfs_equal(isf1, isf2, "Testing 2<->3bar self-inverse");
-    delete isf_tmp;
-    delete isf2;
+        isf_tmp = isf1->exch_13bar();
+        isf2 = isf_tmp->exch_13bar();
+        check_isfs_equal(isf1, isf2, "Testing 1<->3bar self-inverse");
+        delete isf_tmp;
+        delete isf2;
 
-    /* Test also that exch_23bar() is equivalent to the sequence
-        exch_12(), exch_13bar(), exch_12()
-    */
-    isf_tmp = isf1->exch_12();
-    isf_tmp2 = isf_tmp->exch_13bar();
-    isf2 = isf_tmp2->exch_12();
-    isf3 = isf1->exch_23bar();
-    check_isfs_equal(isf2, isf3, "Testing 2<->3bar identity");
-    delete isf_tmp;
-    delete isf_tmp2;
-    delete isf2;
-    delete isf3;
+        isf_tmp = isf1->exch_23bar();
+        isf2 = isf_tmp->exch_23bar();
+        check_isfs_equal(isf1, isf2, "Testing 2<->3bar self-inverse");
+        delete isf_tmp;
+        delete isf2;
 
-    delete isf1;
+        /* Test also that exch_23bar() is equivalent to the sequence
+            exch_12(), exch_13bar(), exch_12()
+        */
+        isf_tmp = isf1->exch_12();
+        isf_tmp2 = isf_tmp->exch_13bar();
+        isf2 = isf_tmp2->exch_12();
+        isf3 = isf1->exch_23bar();
+        check_isfs_equal(isf2, isf3, "Testing 2<->3bar identity");
+        delete isf_tmp;
+        delete isf_tmp2;
+        delete isf2;
+        delete isf3;
+
+        /* Test some particular combinations of irreps */
+        isf2 = isoscalars(p, q, p2, q2, p1, q1);
+        isf3 = isf1->exch_12();
+        check_isfs_equal(isf2, isf3, "Testing 1<->2 correctness");
+        delete isf2;
+        delete isf3;
+
+        isf2 = isoscalars(q1, p1, q, p, p2, q2);
+        isf3 = isf1->exch_13bar();
+        check_isfs_equal(isf2, isf3, "Testing 1<->3bar correctness");
+        delete isf2;
+        delete isf3;
+
+        isf2 = isoscalars(q2, p2, p1, q1, q, p);
+        isf3 = isf1->exch_23bar();
+        check_isfs_equal(isf2, isf3, "Testing 2<->3bar correctness");
+        delete isf2;
+        delete isf3;
+
+        delete isf1;
+    }
 }

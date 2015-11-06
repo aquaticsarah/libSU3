@@ -100,6 +100,37 @@ cgarray* isoarray::to_cgarray()
     return new cgarray(isf);
 }
 
+/* Internal: Check that the sign convention is obeyed.
+    Note: In the situations where this is called, we know that the sign
+    is consistent between degenerate irreps, we just might have an overall
+    - sign on everything.
+*/
+void isoarray::check_sign_convention()
+{
+    long B = (-p1 + 2*p2 + q1 + 4*q2 + p - q)/3;
+    long k2max = min(p2+q2, B);
+    long l2min = max(0, B - p2 - q2);
+
+    while ((*this)(0, p+q, 0, p1+q1, 0, k2max, l2min) == 0)
+    {
+        k2max -= 1;
+        l2min += 1;
+    }
+
+    /* Check the sign */
+    if ((*this)(0, p+q, 0, p1+q1, 0, k2max, l2min) < 0)
+    {
+        /* If the sign is wrong, enforce the convention */
+        long n, k, l, k1, l1, k2, l2;
+        for (n = 0; n < d; ++n)
+            FOREACH_ISF(p, q, p1, q1, p2, q2, k, l, k1, l1, k2, l2)
+            {
+                this->set_isf(n, k, l, k1, l1, k2, l2,
+                    -(*this)(n, k, l, k1, l1, k2, l2));
+            }
+    }
+}
+
 /* Apply the various symmetry relations.
     The formulas for these relations are adapted from Williams.
 */
@@ -116,8 +147,10 @@ isoarray* isoarray::exch_12()
     for (n = 0; n < d; ++n)
         FOREACH_ISF(p, q, p2, q2, p1, q1, k, l, k2, l2, k1, l1)
             array->set_isf(n, k, l, k2, l2, k1, l1,
-                SIGN((k-l-k1+l1-k2+l2)/2) * xi_1
+                SIGN((k-l-k1+l1-k2+l2)/2) * SIGN(n) * xi_1
                 * (*this)(n, k, l, k1, l1, k2, l2));
+
+    array->check_sign_convention();
 
     return array;
 }
@@ -134,9 +167,11 @@ isoarray* isoarray::exch_13bar()
     for (n = 0; n < d; ++n)
         FOREACH_ISF(p, q, p1, q1, p2, q2, k, l, k1, l1, k2, l2)
             array->set_isf(n, p1+q1-l1, p1+q1-k1, p+q-l, p+q-k, k2, l2,
-                    SIGN(l2)
+                    SIGN(l2+n)
                   * sqrat((p1+1)*(q1+1)*(p1+q1+2)*(k-l+1), (p+1)*(q+1)*(p+q+2)*(k1-l1+1))
                   * (*this)(n, k, l, k1, l1, k2, l2));
+
+    array->check_sign_convention();
 
     return array;
 }
