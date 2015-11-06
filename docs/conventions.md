@@ -12,20 +12,21 @@ We label irreducible representations of SU(3) by (p, q) throughout.
 Rather than the usual variables of hypercharge y, isospin i and isospin
 z-component iz, we instead use the following variables:
 
-k = (p+2q)/3 + y/2 + i
-l = (p+2q)/3 + y/2 - i
-m = (p+2q)/3 + y/2 + iz
+    k = (p+2q)/3 + y/2 + i
+    l = (p+2q)/3 + y/2 - i
+    m = (p+2q)/3 + y/2 + iz
 
 These can be inverted to give:
 
-y = k + l - 2(p+2q)/3
-i = (k - l)/2
-iz = (2m - k - l)/2
+    y = k + l - 2(p+2q)/3
+    i = (k - l)/2
+    iz = (2m - k - l)/2
 
 The advantage is that k,l,m are always integers, with ranges:
-* 0 <= l <= q
-* q <= k <= p+q
-* l <= m <= k
+
+    0 <= l <= q
+    q <= k <= p+q
+    l <= m <= k
 
 We pick the state of highest weight in each representation to be the state
 |SHW> with the largest iz. Equivalently, it is the state such that

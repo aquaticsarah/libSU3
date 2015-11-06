@@ -16,20 +16,26 @@ Deriving min/max values
 
 We can rearrange the defining equations for A, s to get:
 
-* k1 = (A+s)/2 - k2
-* l1 = (A-s)/2 - l2
+    k1 = (A+s)/2 - k2
+    l1 = (A-s)/2 - l2
 
 Then we use the valid ranges for k2, l2: We have saturated bounds
-* q2 <= k2 <= p2+q2, which implies (A+s)/2 - (p2+q2) <= k1 <= (A+s)/2 - q2
-* 0 <= l2 <= q2, which implies (A-s)/2 - q2 <= l1 <= (A-s)/2
+
+    q2 <= k2 <= p2+q2
+    0 <= l2 <= q2
+
+which imply:
+
+    (A+s)/2 - (p2+q2) <= k1 <= (A+s)/2 - q2
+    (A-s)/2 - q2 <= l1 <= (A-s)/2
 
 These upper/lower bounds are what we will call the "unrestricted" bounds on
 k1, l1, and we will label them with "_u" at the end. That is, we write
 
-* k1min_u = (A+s)/2 - (p2+q2)
-* k1max_u = (A+s)/2 - q2
-* l1min_u = (A-s)/2 - q2
-* l1max_u = (A-s)/2
+    k1min_u = (A+s)/2 - (p2+q2)
+    k1max_u = (A+s)/2 - q2
+    l1min_u = (A-s)/2 - q2
+    l1max_u = (A-s)/2
 
 (+): Note in particular that, when we step down between planes, we decrease s
 by two. Thus we decrease k1{min/max}* by 1 and increase l1{min/max}* by 1.
@@ -38,10 +44,10 @@ This will be important later.
 Since we only have valid states in our first representation when
 q1 <= k1 <= p1+q1, 0 <= l1 <= q1, we then derive the true values
 
-* k1min = max(q1, k1min_u)
-* k1max = min(p1+q1, k1max_u)
-* l1min = max(0, l1min_u)
-* l1max = min(q2, l1max_u)
+    k1min = max(q1, k1min_u)
+    k1max = min(p1+q1, k1max_u)
+    l1min = max(0, l1min_u)
+    l1max = min(q2, l1max_u)
 
 Deriving s_min, s_max
 =====================
@@ -49,10 +55,10 @@ Deriving s_min, s_max
 Further to the above, we clearly need to have at least one valid state in
 the first representation to couple to. This translates to a set of conditions:
 
-* k1min_u <= p1+q1, which implies (A+s)/2 <= p1+q1+p2+q2
-* k1max_u >= q1, which implies (A+s)/2 >= q1+q2
-* l1min_u <= q1, which implies (A-s)/2 <= q1+q2
-* l1max_u >= 0, which implies (A-s)/2 >= 0
+    k1min_u <= p1+q1, which implies (A+s)/2 <= p1+q1+p2+q2
+    k1max_u >= q1, which implies (A+s)/2 >= q1+q2
+    l1min_u <= q1, which implies (A-s)/2 <= q1+q2
+    l1max_u >= 0, which implies (A-s)/2 >= 0
 
 We also have isospin conservation, which implies:
 
@@ -65,8 +71,8 @@ Thus we also need s >= p+q.
 Rearranging all of the above for s and combining them in an expression
 of the form smin <= s <= smax gives:
 
-* smax = min(2*(p1+q1+p2+q2) - A, A) = min(Ar, A)
-* smin = max(p+q, 2*(q1+q2) - A, A - 2*(q1+q2)) = max(p+q, abs(A - 2*(q1+q2)))
+    smax = min(2*(p1+q1+p2+q2) - A, A) = min(Ar, A)
+    smin = max(p+q, 2*(q1+q2) - A, A - 2*(q1+q2)) = max(p+q, abs(A - 2*(q1+q2)))
 
 where Ar is the same expression as A but with 'p's and 'q's swapped.
 
@@ -114,11 +120,11 @@ succeed on all lower planes.
 Hence the stepping down process will succeed iff any of the following five
 conditions hold:
 
-* smax - 2*d == smin, ie. the degeneracy resolution fills *every* plane
-* k1min_u < q1 at s = smax - 2*d
-* l1max_u > q1 at s = smax - 2*d
-* k1max_u < p1+q1 at s = smax - 2*d
-* l1min_u > 0 at s = smax - 2*d
+    smax - 2*d == smin, ie. the degeneracy resolution fills *every* plane
+    k1min_u < q1 at s = smax - 2*d
+    l1max_u > q1 at s = smax - 2*d
+    k1max_u < p1+q1 at s = smax - 2*d
+    l1min_u > 0 at s = smax - 2*d
 
 We use these criteria in isoscalars.cc to determine what calculational
 method to use before actually performing any calculations. This simplifies
